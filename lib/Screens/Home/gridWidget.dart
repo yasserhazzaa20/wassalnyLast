@@ -13,7 +13,7 @@ Widget customGridView(BuildContext context, List<AllCategory> items) {
     itemCount: items.length,
     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
       crossAxisSpacing: 3,
-      childAspectRatio: MediaQuery.of(context).size.width * .002,
+      childAspectRatio: 1 / 1.2,
       crossAxisCount: 3,
       mainAxisSpacing: .9,
     ),
@@ -23,8 +23,9 @@ Widget customGridView(BuildContext context, List<AllCategory> items) {
           if (items[index].totalDepartment > 0) {
             Get.to(
               Subsections(
-                items: items[index].allDepartment,
-              ),
+                  items: items[index].allDepartment,
+                  name: items[index].categoryName,
+                  banner: items[index].categoryManbanner),
             );
           } else {
             print(items[index].catId);
@@ -51,12 +52,15 @@ Widget customGridView(BuildContext context, List<AllCategory> items) {
                 ),
               ),
             ),
-            Text(
-              items[index].categoryName,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+            Container(
+              child: Text(
+                items[index].categoryName,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
             ),
           ],

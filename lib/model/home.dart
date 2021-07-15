@@ -8,6 +8,8 @@ import 'package:wassalny/network/auth/dio.dart';
 //
 //     final home = homeFromJson(jsonString);
 
+import 'dart:convert';
+
 Home homeFromJson(String str) => Home.fromJson(json.decode(str));
 
 String homeToJson(Home data) => json.encode(data.toJson());
@@ -17,18 +19,21 @@ class Home {
     this.message,
     this.codenum,
     this.status,
+    this.lang,
     this.result,
   });
 
   String message;
   int codenum;
   bool status;
+  String lang;
   Result result;
 
   factory Home.fromJson(Map<String, dynamic> json) => Home(
         message: json["message"],
         codenum: json["codenum"],
         status: json["status"],
+        lang: json["\u0024lang"],
         result: Result.fromJson(json["result"]),
       );
 
@@ -36,6 +41,7 @@ class Home {
         "message": message,
         "codenum": codenum,
         "status": status,
+        "\u0024lang": lang,
         "result": result.toJson(),
       };
 }
@@ -43,19 +49,26 @@ class Home {
 class Result {
   Result({
     this.mainOffers,
+    this.titleRecommended,
+    this.secondOffer,
     this.allRecommended,
     this.allCategories,
     this.allFeatures,
   });
 
-  List<MainOffer> mainOffers;
+  List<Offer> mainOffers;
+  String titleRecommended;
+  List<Offer> secondOffer;
   List<AllRecommended> allRecommended;
   List<AllCategory> allCategories;
   List<AllFeature> allFeatures;
 
   factory Result.fromJson(Map<String, dynamic> json) => Result(
-        mainOffers: List<MainOffer>.from(
-            json["main_offers"].map((x) => MainOffer.fromJson(x))),
+        mainOffers:
+            List<Offer>.from(json["main_offers"].map((x) => Offer.fromJson(x))),
+        titleRecommended: json["title_recommended"],
+        secondOffer: List<Offer>.from(
+            json["second_offer"].map((x) => Offer.fromJson(x))),
         allRecommended: List<AllRecommended>.from(
             json["all_recommended"].map((x) => AllRecommended.fromJson(x))),
         allCategories: List<AllCategory>.from(
@@ -66,6 +79,8 @@ class Result {
 
   Map<String, dynamic> toJson() => {
         "main_offers": List<dynamic>.from(mainOffers.map((x) => x.toJson())),
+        "title_recommended": titleRecommended,
+        "second_offer": List<dynamic>.from(secondOffer.map((x) => x.toJson())),
         "all_recommended":
             List<dynamic>.from(allRecommended.map((x) => x.toJson())),
         "all_categories":
@@ -78,6 +93,7 @@ class AllCategory {
   AllCategory({
     this.allDepartment,
     this.totalDepartment,
+    this.categoryManbanner,
     this.categoryImage,
     this.categoryName,
     this.catId,
@@ -85,6 +101,7 @@ class AllCategory {
 
   List<AllDepartment> allDepartment;
   int totalDepartment;
+  String categoryManbanner;
   String categoryImage;
   String categoryName;
   int catId;
@@ -93,6 +110,7 @@ class AllCategory {
         allDepartment: List<AllDepartment>.from(
             json["all_department"].map((x) => AllDepartment.fromJson(x))),
         totalDepartment: json["total_department"],
+        categoryManbanner: json["category_manbanner"],
         categoryImage: json["category_image"],
         categoryName: json["category_name"],
         catId: json["cat_id"],
@@ -102,6 +120,7 @@ class AllCategory {
         "all_department":
             List<dynamic>.from(allDepartment.map((x) => x.toJson())),
         "total_department": totalDepartment,
+        "category_manbanner": categoryManbanner,
         "category_image": categoryImage,
         "category_name": categoryName,
         "cat_id": catId,
@@ -134,6 +153,9 @@ class AllDepartment {
 
 class AllFeature {
   AllFeature({
+    this.categoryTotalDepartment,
+    this.categoryTotalDepartmentKey,
+    this.categoryManbanner,
     this.categoryImage,
     this.categoryName,
     this.catId,
@@ -141,6 +163,9 @@ class AllFeature {
     this.allProducts,
   });
 
+  int categoryTotalDepartment;
+  int categoryTotalDepartmentKey;
+  String categoryManbanner;
   String categoryImage;
   String categoryName;
   int catId;
@@ -148,6 +173,9 @@ class AllFeature {
   List<AllProduct> allProducts;
 
   factory AllFeature.fromJson(Map<String, dynamic> json) => AllFeature(
+        categoryTotalDepartment: json["category_total_department"],
+        categoryTotalDepartmentKey: json["category_total_department_key"],
+        categoryManbanner: json["category_manbanner"],
         categoryImage: json["category_image"],
         categoryName: json["category_name"],
         catId: json["cat_id"],
@@ -157,6 +185,9 @@ class AllFeature {
       );
 
   Map<String, dynamic> toJson() => {
+        "category_total_department": categoryTotalDepartment,
+        "category_total_department_key": categoryTotalDepartmentKey,
+        "category_manbanner": categoryManbanner,
         "category_image": categoryImage,
         "category_name": categoryName,
         "cat_id": catId,
@@ -167,18 +198,24 @@ class AllFeature {
 
 class AllProduct {
   AllProduct({
+    this.favExit,
+    this.totalRate,
     this.productImage,
     this.productName,
     this.phone,
     this.prodId,
   });
 
+  int favExit;
+  String totalRate;
   String productImage;
   String productName;
   String phone;
   int prodId;
 
   factory AllProduct.fromJson(Map<String, dynamic> json) => AllProduct(
+        favExit: json["fav_exit"],
+        totalRate: json["total_rate"],
         productImage: json["product_image"],
         productName: json["product_name"],
         phone: json["phone"],
@@ -186,6 +223,8 @@ class AllProduct {
       );
 
   Map<String, dynamic> toJson() => {
+        "fav_exit": favExit,
+        "total_rate": totalRate,
         "product_image": productImage,
         "product_name": productName,
         "phone": phone,
@@ -221,8 +260,8 @@ class AllRecommended {
       };
 }
 
-class MainOffer {
-  MainOffer({
+class Offer {
+  Offer({
     this.image,
     this.link,
     this.serviceId,
@@ -232,7 +271,7 @@ class MainOffer {
   String link;
   String serviceId;
 
-  factory MainOffer.fromJson(Map<String, dynamic> json) => MainOffer(
+  factory Offer.fromJson(Map<String, dynamic> json) => Offer(
         image: json["image"],
         link: json["link"],
         serviceId: json["service_id"],
@@ -257,13 +296,15 @@ class HomeLists with ChangeNotifier {
     this.lang,
   });
 
-  List<MainOffer> sliderImageInMain = [];
+  List<Offer> sliderImageInMain = [];
+  List<Offer> secondSlider = [];
   List<AllCategory> allCategories = [];
   List<AllFeature> allfeature = [];
   List<AllRecommended> recomended = [];
   String recommendedImage = '';
   int recommendedId = 0;
   int recomendedBosition;
+  String recomendedString = '';
   Future<void> fetchHome(String lang) async {
     print('$token ===============================');
     try {
@@ -275,6 +316,7 @@ class HomeLists with ChangeNotifier {
       );
       print(response);
       sliderImageInMain = homeFromJson(response.toString()).result.mainOffers;
+      secondSlider = homeFromJson(response.toString()).result.secondOffer;
       allCategories = homeFromJson(response.toString()).result.allCategories;
       allfeature =
           homeFromJson(response.toString()).result.allFeatures.where((element) {
@@ -286,6 +328,7 @@ class HomeLists with ChangeNotifier {
         recommendedId = recomended[i].id;
         recomendedBosition = recomended[i].recommendedPosition;
       }
+      recomendedString = response.data['result']['title_recommended'];
     } catch (err) {
       // ignore: unnecessary_brace_in_string_interps
       print('${err} error from offersssssssssssss list');

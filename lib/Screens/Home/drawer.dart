@@ -13,7 +13,10 @@ import 'package:wassalny/Screens/Offerss/view.dart';
 import 'package:wassalny/Screens/Profile/view.dart';
 import 'package:wassalny/Screens/Subscirbe/view.dart';
 import 'package:wassalny/Screens/Tickets/view.dart';
+import 'package:wassalny/Screens/cart/cart.dart';
 import 'package:wassalny/Screens/login/view.dart';
+import 'package:wassalny/Screens/myFavourite/myFavouriteScreen.dart';
+import 'package:wassalny/Screens/myOrders/myOrders.dart';
 
 import 'dart:io' show Platform;
 
@@ -134,6 +137,15 @@ class _MyDrawer extends State<MyDrawer> {
               menuTitle("notifications".tr, () {
                 Get.to(Notififications());
               }),
+              menuTitle("Favourite".tr, () {
+                Get.to(MyFavouriteScreen());
+              }),
+              menuTitle("cart".tr, () {
+                Get.to(CartScreen());
+              }),
+              menuTitle("MyOrders".tr, () {
+                Get.to(MyOrdersScreen());
+              }),
               menuTitle("offers".tr, () {
                 Get.to(Offerss());
               }),
@@ -159,6 +171,9 @@ class _MyDrawer extends State<MyDrawer> {
                 },
               ),
               menuTitle("SignOut".tr, _submit),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.15,
+              ),
             ],
           ),
         ),

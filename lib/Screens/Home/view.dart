@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:get/get.dart';
@@ -12,6 +13,7 @@ import 'package:wassalny/Screens/CategoryList/view.dart';
 import 'package:wassalny/Screens/Filter/view.dart';
 import 'package:wassalny/Screens/searchScreen/searchScreen.dart' as Search;
 import 'package:wassalny/Screens/service_details/servicesDetails.dart';
+import 'package:wassalny/model/addToFavourite.dart';
 import 'package:wassalny/model/home.dart';
 import 'package:wassalny/model/homeSearch.dart';
 
@@ -81,7 +83,7 @@ class _HomeState extends State<Home> {
     final hight = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top);
 
-    List<MainOffer> sliderImageInMain =
+    List<Offer> sliderImageInMain =
         Provider.of<HomeLists>(context, listen: false).sliderImageInMain;
     return Padding(
       padding: EdgeInsets.only(
@@ -201,6 +203,29 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Future<void> _sentFav(int isFav, int productId) async {
+    setState(() {});
+    bool done =
+        Provider.of<UpdateFavProvider>(context, listen: false).doneSenting;
+
+    try {
+      done = await Provider.of<UpdateFavProvider>(context, listen: false)
+          .updateFav(
+        key: isFav == 0 ? '1' : '2',
+        id: productId,
+      );
+
+      // ignore: unused_catch_clause
+    } catch (error) {
+      print(error);
+      Navigator.of(context).pop();
+      showErrorDaialog('No internet connection', context);
+    }
+    if (done) {
+      fechHome();
+    }
+  }
+
   @override
   void initState() {
     fechHome();
@@ -218,7 +243,10 @@ class _HomeState extends State<Home> {
         Provider.of<HomeLists>(context).allCategories;
     List<AllFeature> allfeature =
         Provider.of<HomeLists>(context, listen: false).allfeature;
-
+    List<Offer> secondSlider =
+        Provider.of<HomeLists>(context, listen: false).secondSlider;
+    String recomendedString =
+        Provider.of<HomeLists>(context, listen: false).recomendedString;
     return Scaffold(
       // backgroundColor: Colors.grey[100],
       key: _scafold2,
@@ -239,7 +267,7 @@ class _HomeState extends State<Home> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: width * 0.048),
                   child: AutoSizeText(
-                    'Recommended'.tr,
+                    recomendedString,
                     style: TextStyle(fontSize: 20),
                   ),
                 ),
@@ -420,45 +448,82 @@ class _HomeState extends State<Home> {
                   context,
                   allCategories,
                 ),
-                SizedBox(height: 20),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 15),
                   child: Column(
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(15),
+                      Padding(
+                        padding: EdgeInsets.only(top: hight * 0.02),
+                        child: Container(
+                          height: hight * 0.25,
+                          decoration: BoxDecoration(
+                            border: Border(),
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                        ),
-                        child: GestureDetector(
-                          onTap: () {
-                            Get.to(Filter(1));
-                          },
-                          child: Row(
-                            children: [
-                              Text(
-                                'FastSearch'.tr,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18),
-                              ),
-                              SizedBox(width: 10),
-                              Icon(Icons.search, color: Colors.indigo),
-                              Spacer(),
-                              Text(
-                                "ReachingTheGoal".tr,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18),
-                              ),
-                              SizedBox(width: 10),
-                              Icon(Icons.location_on, color: Colors.indigo)
-                            ],
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Carousel(
+                                boxFit: BoxFit.fill,
+                                images: secondSlider.map(
+                                  (e) {
+                                    return InkWell(
+                                      onTap: e.link.isEmpty ||
+                                              e.link == null ||
+                                              e.link == ''
+                                          ? () {}
+                                          : () async {
+                                              await launch('http:${e.link}');
+                                            },
+                                      child: Image.network(
+                                        e.image,
+                                        fit: BoxFit.fill,
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+                                autoplay: true,
+                                dotSize: 7.0,
+                                overlayShadow: true,
+                                dotColor: Colors.blue,
+                                indicatorBgPadding: 1.0,
+                                dotBgColor: Colors.transparent),
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      // Container(
+                      //   padding: EdgeInsets.all(10),
+                      //   decoration: BoxDecoration(
+                      //     color: Colors.grey.shade200,
+                      //     borderRadius: BorderRadius.all(
+                      //       Radius.circular(15),
+                      //     ),
+                      //   ),
+                      //   child: GestureDetector(
+                      //     onTap: () {
+                      //       Get.to(Filter(1));
+                      //     },
+                      //     child: Row(
+                      //       children: [
+                      //         Text(
+                      //           'FastSearch'.tr,
+                      //           style: TextStyle(
+                      //               fontWeight: FontWeight.bold, fontSize: 18),
+                      //         ),
+                      //         SizedBox(width: 10),
+                      //         Icon(Icons.search, color: Colors.indigo),
+                      //         Spacer(),
+                      //         Text(
+                      //           "ReachingTheGoal".tr,
+                      //           style: TextStyle(
+                      //               fontWeight: FontWeight.bold, fontSize: 18),
+                      //         ),
+                      //         SizedBox(width: 10),
+                      //         Icon(Icons.location_on, color: Colors.indigo)
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
+                      SizedBox(height: 30),
                       ...allfeature.map((items) {
                         // ignore: unused_element
                         int mainId() {
@@ -475,37 +540,31 @@ class _HomeState extends State<Home> {
                         return Container(
                           child: Column(
                             children: [
-                              InkWell(
-                                onTap: () => Get.to(
-                                  CategoryList(items.catId, 1, 1),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsetsDirectional.only(
-                                          start: 10),
-                                      child: Text(
-                                        items.categoryName,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 25),
-                                      ),
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                        start: 10),
+                                    child: Text(
+                                      items.categoryName,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 25),
                                     ),
-                                    Spacer(),
-                                    Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          color: Colors.blue.withAlpha(40),
-                                          image: DecorationImage(
-                                              image: NetworkImage(
-                                                  items.categoryImage),
-                                              fit: BoxFit.fill),
-                                        ),
-                                        height: 90,
-                                        width: 90),
-                                  ],
-                                ),
+                                  ),
+                                  Spacer(),
+                                  Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(15),
+                                        color: Colors.blue.withAlpha(40),
+                                        image: DecorationImage(
+                                            image: NetworkImage(
+                                                items.categoryImage),
+                                            fit: BoxFit.fill),
+                                      ),
+                                      height: 90,
+                                      width: 90),
+                                ],
                               ),
                               SizedBox(height: 20),
                               SingleChildScrollView(
@@ -531,7 +590,7 @@ class _HomeState extends State<Home> {
                                             borderRadius:
                                                 BorderRadius.circular(15),
                                           ),
-                                          height: 80,
+                                          height: 100,
                                           width: 100,
                                           child: ClipRRect(
                                             borderRadius:
@@ -543,9 +602,38 @@ class _HomeState extends State<Home> {
                                           ),
                                         ),
                                       ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          IconButton(
+                                              onPressed: () =>
+                                                  _sentFav(e.favExit, e.prodId),
+                                              icon: e.favExit == 0
+                                                  ? Icon(
+                                                      CupertinoIcons.heart,
+                                                      color: Colors.red,
+                                                    )
+                                                  : Icon(
+                                                      CupertinoIcons.heart_fill,
+                                                      color: Colors.red,
+                                                    )),
+                                          SizedBox(
+                                            width: 8,
+                                          ),
+                                          Icon(
+                                            Icons.star,
+                                            color: Colors.yellow,
+                                          ),
+                                          e.totalRate == '' ||
+                                                  e.totalRate == null
+                                              ? Text('0')
+                                              : Text(e.totalRate),
+                                        ],
+                                      ),
                                       Text(e.productName),
                                       SizedBox(
-                                        width: 10,
+                                        width: 15,
                                       )
                                     ]);
                                   }).toList(),

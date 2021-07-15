@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:wassalny/model/addToCart.dart';
 import 'package:wassalny/model/min_sirv.dart';
 
 class Min extends StatefulWidget {
@@ -31,6 +32,62 @@ class _MinState extends State<Min> {
       setState(() {
         loader = false;
       });
+      throw (error);
+    }
+  }
+
+  Future<void> add(int id) async {
+    try {
+      await Provider.of<AddProductProvider>(context, listen: false)
+          .addToCart(id);
+
+      Get.snackbar(
+        'تم الاضافه',
+        'تم الاضافه الي العربه بنجاح',
+        titleText: Text(
+          'تم الاضافه ',
+          textDirection: lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        messageText: Text(
+          'تم الاضافه الي العربه بنجاح',
+          textDirection: lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+      );
+    } catch (error) {
+      print(error);
+
+      Get.snackbar(
+        'لم تتم الاضافه',
+        'تحقق من الاتصال بالانترت',
+        titleText: Text(
+          'لم تتم الاضافه',
+          textDirection: lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        messageText: Text(
+          'تحقق من الاتصال بالانترت',
+          textDirection: lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+      );
       throw (error);
     }
   }
@@ -106,7 +163,7 @@ class _MinState extends State<Min> {
                                         info[index].name,
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 20,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
                                         maxLines: 1,
@@ -189,7 +246,28 @@ class _MinState extends State<Min> {
                                           ),
                                         ],
                                       ),
-                                    )
+                                    ),
+                                    SizedBox(
+                                      width: width * 0.3,
+                                      child: RaisedButton(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        color: Colors.blue,
+                                        onPressed: () {
+                                          add(info[index].id);
+                                        },
+                                        child: AutoSizeText(
+                                          'اضافه الي السله',
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 Spacer(),

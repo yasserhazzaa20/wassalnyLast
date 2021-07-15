@@ -35,7 +35,7 @@ class Auth with ChangeNotifier {
       Dio.Response response = await dio().post(
         'pages/set_login',
         data: Dio.FormData.fromMap(user.sentPhoneToLogin(
-          await FCMConfig().getToken(),
+          await FCMConfig.messaging.getToken(),
         )),
       );
       print(response);
@@ -173,7 +173,7 @@ class Auth with ChangeNotifier {
             token,
             language,
             country,
-            await FCMConfig().getToken(),
+            await FCMConfig.messaging.getToken(),
           ),
         ),
       );

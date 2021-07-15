@@ -4,6 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart' as Dio;
 import 'package:wassalny/network/auth/dio.dart';
 
+// To parse this JSON data, do
+//
+//     final detailsOfServices = detailsOfServicesFromJson(jsonString);
+
 DetailsOfServices detailsOfServicesFromJson(String str) =>
     DetailsOfServices.fromJson(json.decode(str));
 
@@ -49,25 +53,25 @@ class Result {
     this.allProducts,
   });
 
-  List<CategoryDetail> categoryDetails;
+  CategoryDetails categoryDetails;
   List<AllProduct> allProducts;
 
   factory Result.fromJson(Map<String, dynamic> json) => Result(
-        categoryDetails: List<CategoryDetail>.from(
-            json["category_details"].map((x) => CategoryDetail.fromJson(x))),
+        categoryDetails: CategoryDetails.fromJson(json["category_details"]),
         allProducts: List<AllProduct>.from(
             json["all_products"].map((x) => AllProduct.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "category_details":
-            List<dynamic>.from(categoryDetails.map((x) => x.toJson())),
+        "category_details": categoryDetails.toJson(),
         "all_products": List<dynamic>.from(allProducts.map((x) => x.toJson())),
       };
 }
 
 class AllProduct {
   AllProduct({
+    this.favExit,
+    this.totalRate,
     this.productImage,
     this.productName,
     this.phone,
@@ -75,6 +79,8 @@ class AllProduct {
     this.delivery,
   });
 
+  int favExit;
+  String totalRate;
   String productImage;
   String productName;
   String phone;
@@ -82,6 +88,8 @@ class AllProduct {
   int delivery;
 
   factory AllProduct.fromJson(Map<String, dynamic> json) => AllProduct(
+        favExit: json["fav_exit"],
+        totalRate: json["total_rate"],
         productImage: json["product_image"],
         productName: json["product_name"],
         phone: json["phone"],
@@ -90,6 +98,8 @@ class AllProduct {
       );
 
   Map<String, dynamic> toJson() => {
+        "fav_exit": favExit,
+        "total_rate": totalRate,
         "product_image": productImage,
         "product_name": productName,
         "phone": phone,
@@ -98,24 +108,29 @@ class AllProduct {
       };
 }
 
-class CategoryDetail {
-  CategoryDetail({
+class CategoryDetails {
+  CategoryDetails({
+    this.categoryManbanner,
     this.categoryImage,
     this.categoryName,
     this.catId,
   });
 
+  String categoryManbanner;
   String categoryImage;
   String categoryName;
   int catId;
 
-  factory CategoryDetail.fromJson(Map<String, dynamic> json) => CategoryDetail(
+  factory CategoryDetails.fromJson(Map<String, dynamic> json) =>
+      CategoryDetails(
+        categoryManbanner: json["category_manbanner"],
         categoryImage: json["category_image"],
         categoryName: json["category_name"],
         catId: json["cat_id"],
       );
 
   Map<String, dynamic> toJson() => {
+        "category_manbanner": categoryManbanner,
         "category_image": categoryImage,
         "category_name": categoryName,
         "cat_id": catId,
@@ -129,7 +144,7 @@ class DetailsOfServicesProvider with ChangeNotifier {
     this.token,
   });
 
-  List<CategoryDetail> categoryDetail = [];
+  CategoryDetails categoryDetail;
   List<AllProduct> allProduct = [];
   String name;
   String imag;
@@ -137,7 +152,17 @@ class DetailsOfServicesProvider with ChangeNotifier {
   int total;
   Future<void> fetchAllCategories(
       String lang, int id, int limt, int pageNumber, int main) async {
-    print(main.toString());
+    print("$id الاي");
+    Map m = {
+      'key': 1234567890,
+      'lang': lang,
+      'token_id': token,
+      'cat_id': id,
+      'limit': limt,
+      'page_number': pageNumber,
+      'main': main
+    };
+    print(m);
     try {
       Dio.Response response = await dio().post(
         'user_api/get_all_services',
@@ -154,17 +179,11 @@ class DetailsOfServicesProvider with ChangeNotifier {
         ),
       );
       print(response);
-      categoryDetail.addAll(detailsOfServicesFromJson(response.toString())
-          .result
-          .categoryDetails);
-      allProduct.addAll(
-          detailsOfServicesFromJson(response.toString()).result.allProducts);
+      allProduct =
+          detailsOfServicesFromJson(response.toString()).result.allProducts;
 
-      for (var i = 0; i < categoryDetail.length; i++) {
-        name = categoryDetail[i].categoryName;
-        imag = categoryDetail[i].categoryImage;
-        id = categoryDetail[i].catId;
-      }
+      categoryDetail =
+          detailsOfServicesFromJson(response.toString()).result.categoryDetails;
       total = response.data['total'];
     } catch (err) {
       throw (err);

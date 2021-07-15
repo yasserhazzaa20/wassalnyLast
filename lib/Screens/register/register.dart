@@ -218,7 +218,9 @@ class _RegisterState extends State<Register> {
                       backgroundColor: Colors.blue,
                       borderColor: Colors.blue,
                       isShadow: 1,
-                      onTap: _submit,
+                      onTap: cityId == null
+                          ? () => Get.snackbar('انتباه', 'يرجي اختيار الدوله')
+                          : _submit,
                       textColor: Colors.white,
                       label: "login".tr),
                 ],

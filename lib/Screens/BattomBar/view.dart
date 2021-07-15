@@ -92,17 +92,16 @@ class _BottomNavyViewState extends State<BottomNavyView>
                 right: 0,
                 left: 0,
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                      color: Colors.blue,
-                      boxShadow: [
-                        BoxShadow(
-                            color: MyColors.lightBlue.withOpacity(.3),
-                            spreadRadius: 1,
-                            blurRadius: 1,
-                            offset: Offset(0, 1))
-                      ],
-                      borderRadius: BorderRadius.all(Radius.circular(30))),
+                    color: Colors.blue,
+                    boxShadow: [
+                      BoxShadow(
+                          color: MyColors.lightBlue.withOpacity(.3),
+                          spreadRadius: 1,
+                          blurRadius: 1,
+                          offset: Offset(0, 1))
+                    ],
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -112,19 +111,21 @@ class _BottomNavyViewState extends State<BottomNavyView>
                           },
                           child: Column(
                             children: [
-                              Icon(Icons.home, size: 30, color: Colors.white),
+                              SizedBox(height: 3),
+                              Icon(Icons.home, size: 28, color: Colors.white),
                               SizedBox(height: 0),
                               MyText(
                                 title: "Main".tr,
                                 color: Colors.white,
-                                size: 12,
-                              )
+                                size: 11,
+                              ),
+                              SizedBox(height: 3),
                             ],
                           ),
                         ),
                       ),
                       Container(
-                        height: 50,
+                        height: 40,
                         width: .4,
                         color: Colors.black,
                         child: Container(),
@@ -136,20 +137,22 @@ class _BottomNavyViewState extends State<BottomNavyView>
                           },
                           child: Column(
                             children: [
+                              SizedBox(height: 3),
                               Icon(Icons.offline_bolt,
-                                  size: 30, color: Colors.white),
+                                  size: 28, color: Colors.white),
                               SizedBox(height: 0),
                               MyText(
                                 title: "offers".tr,
                                 color: Colors.white,
-                                size: 12,
-                              )
+                                size: 11,
+                              ),
+                              SizedBox(height: 3),
                             ],
                           ),
                         ),
                       ),
                       Container(
-                          height: 50,
+                          height: 40,
                           width: .4,
                           color: Colors.black,
                           child: Container()),
@@ -160,13 +163,15 @@ class _BottomNavyViewState extends State<BottomNavyView>
                           },
                           child: Column(
                             children: [
-                              Icon(Icons.search, size: 30, color: Colors.white),
+                              SizedBox(height: 3),
+                              Icon(Icons.search, size: 28, color: Colors.white),
                               SizedBox(height: 0),
                               MyText(
                                 title: "Searchfilter".tr,
                                 color: Colors.white,
-                                size: 12,
+                                size: 11,
                               ),
+                              SizedBox(height: 3),
                             ],
                           ),
                         ),

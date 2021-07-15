@@ -4,14 +4,19 @@ import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:wassalny/waslnyApp.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling a background message: ${message.messageId}");
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   await GetStorage.init();
-  await FCMConfig().init();
-  FCMConfig().getToken().then((token) {});
+  await FCMConfig.instance
+      .init(onBackgroundMessage: _firebaseMessagingBackgroundHandler);
+
   runApp(
     WaslnyApp(),
   );

@@ -58,6 +58,7 @@ class Result {
 
 class AllOffer {
   AllOffer({
+    this.allGalleries,
     this.offerImage,
     this.serviceImage,
     this.serviceId,
@@ -73,6 +74,7 @@ class AllOffer {
     this.offerId,
   });
 
+  List<AllGallery> allGalleries;
   String offerImage;
   String serviceImage;
   String serviceId;
@@ -83,11 +85,13 @@ class AllOffer {
   String whatsapp;
   String oldPrice;
   String newPrice;
-  String startDate;
-  String endDate;
+  DateTime startDate;
+  DateTime endDate;
   int offerId;
 
   factory AllOffer.fromJson(Map<String, dynamic> json) => AllOffer(
+        allGalleries: List<AllGallery>.from(
+            json["all_galleries"].map((x) => AllGallery.fromJson(x))),
         offerImage: json["offer_image"],
         serviceImage: json["service_image"],
         serviceId: json["service_id"],
@@ -98,12 +102,14 @@ class AllOffer {
         whatsapp: json["whatsapp"],
         oldPrice: json["old_price"],
         newPrice: json["new_price"],
-        startDate: json["start_date"],
-        endDate: json["end_date"],
+        startDate: DateTime.parse(json["start_date"]),
+        endDate: DateTime.parse(json["end_date"]),
         offerId: json["offer_id"],
       );
 
   Map<String, dynamic> toJson() => {
+        "all_galleries":
+            List<dynamic>.from(allGalleries.map((x) => x.toJson())),
         "offer_image": offerImage,
         "service_image": serviceImage,
         "service_id": serviceId,
@@ -114,9 +120,31 @@ class AllOffer {
         "whatsapp": whatsapp,
         "old_price": oldPrice,
         "new_price": newPrice,
-        "start_date": startDate,
-        "end_date": endDate,
+        "start_date":
+            "${startDate.year.toString().padLeft(4, '0')}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}",
+        "end_date":
+            "${endDate.year.toString().padLeft(4, '0')}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}",
         "offer_id": offerId,
+      };
+}
+
+class AllGallery {
+  AllGallery({
+    this.offersImage,
+    this.offersId,
+  });
+
+  String offersImage;
+  String offersId;
+
+  factory AllGallery.fromJson(Map<String, dynamic> json) => AllGallery(
+        offersImage: json["offers_image"],
+        offersId: json["offers_id"] == null ? null : json["offers_id"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "offers_image": offersImage,
+        "offers_id": offersId == null ? null : offersId,
       };
 }
 
@@ -133,6 +161,8 @@ class AllOffersProvider with ChangeNotifier {
   });
 
   List<AllOffer> allOffers = [];
+  List<AllGallery> allGalleries;
+
   // List<SliderOffer> slideOffers=[];
   Future<void> fetchAllOffers(String language) async {
     try {
@@ -144,6 +174,9 @@ class AllOffersProvider with ChangeNotifier {
       );
       print(response);
       allOffers = offersFromJson(response.toString()).result.allOffers;
+      for (var i = 0; i < allOffers.length; i++) {
+        allGalleries = allOffers[i].allGalleries;
+      }
       // slideOffers = offersFromJson(response.toString()).result.sliderOffers;
     } catch (err) {
       // ignore: unnecessary_brace_in_string_interps

@@ -10,18 +10,21 @@ import 'package:wassalny/Components/CustomWidgets/appBar.dart';
 import 'package:wassalny/Components/CustomWidgets/myColors.dart';
 import 'package:wassalny/Screens/searchLatAndLag/searchLatAndLagScreen.dart';
 
-class MapPage extends StatefulWidget {
+import 'endOrderScreen.dart';
+
+class SelectUrLocationScreen extends StatefulWidget {
   final String type;
   final int index;
   final int id;
   final int searchType;
-  MapPage({Key key, this.type, this.id, this.index, this.searchType})
+  SelectUrLocationScreen(
+      {Key key, this.type, this.id, this.index, this.searchType})
       : super(key: key);
   @override
-  _MapPageState createState() => _MapPageState();
+  _SelectUrLocationScreenState createState() => _SelectUrLocationScreenState();
 }
 
-class _MapPageState extends State<MapPage> {
+class _SelectUrLocationScreenState extends State<SelectUrLocationScreen> {
   BitmapDescriptor myIcon;
 
   GoogleMapController myController;
@@ -98,12 +101,8 @@ class _MapPageState extends State<MapPage> {
         print(currentLong);
         print(currentLat);
 
-        Get.to(() => SearchLatAndLagScreen(
-              id: widget.id,
-              lag: currentLong,
-              lat: currentLat,
-              searchType: widget.searchType,
-            ));
+        Navigator.of(context).pop<LocationModel>(LocationModel(
+            lat: currentLat, lng: currentLong, address: currentAddress));
       },
       child: Container(
         height: 50,

@@ -1,12 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:wassalny/Components/CustomWidgets/MyText.dart';
 import 'package:wassalny/Components/CustomWidgets/appBar.dart';
+import 'package:wassalny/Components/CustomWidgets/showdialog.dart';
 import 'package:wassalny/Screens/Location/view.dart';
 import 'package:wassalny/Screens/SetAddress/view.dart';
 import 'package:wassalny/Screens/service_details/servicesDetails.dart';
+import 'package:wassalny/model/addToFavourite.dart';
 import 'package:wassalny/model/categoriseDetails.dart';
 
 class CategoryList extends StatefulWidget {
@@ -27,7 +30,9 @@ class _CategoryListState extends State<CategoryList> {
 
   // ignore: override_on_non_overriding_member
   Future<void> future() async {
-    loader = true;
+    setState(() {
+      loader = true;
+    });
     print(widget.id);
     var provider =
         Provider.of<DetailsOfServicesProvider>(context, listen: false);
@@ -75,6 +80,29 @@ class _CategoryListState extends State<CategoryList> {
     }
   }
 
+  Future<void> _sentFav(int isFav, int productId) async {
+    setState(() {});
+    bool done =
+        Provider.of<UpdateFavProvider>(context, listen: false).doneSenting;
+
+    try {
+      done = await Provider.of<UpdateFavProvider>(context, listen: false)
+          .updateFav(
+        key: isFav == 0 ? '1' : '2',
+        id: productId,
+      );
+
+      // ignore: unused_catch_clause
+    } catch (error) {
+      print(error);
+      Navigator.of(context).pop();
+      showErrorDaialog('No internet connection', context);
+    }
+    if (done) {
+      future();
+    }
+  }
+
   @override
   void initState() {
     future();
@@ -83,9 +111,11 @@ class _CategoryListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.id);
     final width = (MediaQuery.of(context).size.width);
 
     final info = Provider.of<DetailsOfServicesProvider>(context, listen: false);
+
     List<AllProduct> allProduct = info.allProduct;
     return Scaffold(
       appBar: categoryAppBar(context),
@@ -170,6 +200,28 @@ class _CategoryListState extends State<CategoryList> {
                       ],
                     ),
                   ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: Container(
+                      width: width,
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Image.network(
+                        info.categoryDetail.categoryManbanner,
+                        fit: BoxFit.fill,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.asset(
+                          'assets/images/sema.png',
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                     decoration: BoxDecoration(
@@ -182,7 +234,9 @@ class _CategoryListState extends State<CategoryList> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              MyText(title: info.name, size: 25),
+                              MyText(
+                                  title: info.categoryDetail.categoryName,
+                                  size: 25),
                             ],
                           ),
                         ),
@@ -191,7 +245,8 @@ class _CategoryListState extends State<CategoryList> {
                               borderRadius: BorderRadius.circular(8),
                               color: Colors.blue.withAlpha(40),
                               image: DecorationImage(
-                                image: NetworkImage(info.imag),
+                                image: NetworkImage(
+                                    info.categoryDetail.categoryImage),
                               ),
                             ),
                             height: 70,
@@ -215,13 +270,11 @@ class _CategoryListState extends State<CategoryList> {
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisSpacing: 0,
-                            childAspectRatio:
-                                MediaQuery.of(context).size.width * .0025,
+                            childAspectRatio: 2 / 2.3,
                             crossAxisCount: 2,
                             mainAxisSpacing: 0,
                           ),
                           itemBuilder: (context, index) {
-                            print(allProduct[index].prodId);
                             return InkWell(
                               onTap: () {
                                 Get.to(
@@ -230,26 +283,64 @@ class _CategoryListState extends State<CategoryList> {
                               },
                               child: Column(
                                 children: [
-                                  Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(15),
-                                        color: Colors.white,
-                                        image: DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image: NetworkImage(
-                                              allProduct[index].productImage),
-                                        ),
+                                  Stack(
+                                    children: [
+                                      Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            color: Colors.white,
+                                            image: DecorationImage(
+                                              fit: BoxFit.cover,
+                                              image: NetworkImage(
+                                                  allProduct[index]
+                                                      .productImage),
+                                            ),
+                                          ),
+                                          height: 100,
+                                          width: 100),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      IconButton(
+                                          onPressed: () => _sentFav(
+                                              allProduct[index].favExit,
+                                              allProduct[index].prodId),
+                                          icon: allProduct[index].favExit == 0
+                                              ? Icon(
+                                                  CupertinoIcons.heart,
+                                                  color: Colors.red,
+                                                )
+                                              : Icon(
+                                                  CupertinoIcons.heart_fill,
+                                                  color: Colors.red,
+                                                )),
+                                      SizedBox(
+                                        width: 8,
                                       ),
-                                      height: 130,
-                                      width: MediaQuery.of(context).size.width *
-                                          .3),
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.yellow,
+                                      ),
+                                      allProduct[index].totalRate == '' ||
+                                              allProduct[index].totalRate ==
+                                                  null
+                                          ? Text('0')
+                                          : Text(allProduct[index].totalRate),
+                                    ],
+                                  ),
                                   Text(allProduct[index].productName,
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18),
-                                      textAlign: TextAlign.start),
+                                      textAlign: TextAlign.center),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
                                 ],
                               ),
                             );

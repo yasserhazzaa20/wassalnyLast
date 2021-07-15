@@ -9,13 +9,22 @@ import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:provider/provider.dart';
+import 'package:wassalny/model/addRatingModel.dart';
+import 'package:wassalny/model/addToCart.dart';
+import 'package:wassalny/model/addToFavourite.dart';
+import 'package:wassalny/model/endOrderProvider.dart';
+import 'package:wassalny/model/getMyFav.dart';
+import 'package:wassalny/model/myOrdersProvider.dart';
+import 'package:wassalny/model/sentLocation.dart';
 import 'package:wassalny/splash.dart';
 import 'Components/CustomWidgets/myColors.dart';
 import 'Components/Language/getLanguage.dart';
 import 'Screens/register/county/list.dart';
 import 'model/aboutandcontact.dart';
 import 'model/branches.dart';
+import 'model/cartProvider.dart';
 import 'model/categoriseDetails.dart';
+import 'model/deleteItem.dart';
 import 'model/home.dart';
 import 'model/homeSearch.dart';
 import 'model/itemServicesDetail.dart';
@@ -31,6 +40,7 @@ import 'model/searchStates.dart' as y;
 import 'model/notifDetails.dart';
 import 'model/searchLAndLat.dart';
 import 'model/sirv_offers.dart';
+import 'model/updateCartProvider.dart';
 import 'network/auth/auth.dart';
 
 class WaslnyApp extends StatefulWidget {
@@ -164,6 +174,11 @@ class _WaslnyAppState extends State<WaslnyApp> with WidgetsBindingObserver {
           update: (context, auth, searchCity) =>
               NotificationDetailsProvider(token: auth.token),
         ),
+        ChangeNotifierProxyProvider<Auth, AddRatingProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              AddRatingProvider(token: auth.token),
+        ),
         ChangeNotifierProxyProvider<Auth, SearchLatAndLagProvider>(
           create: null,
           update: (context, auth, searchCity) =>
@@ -178,6 +193,59 @@ class _WaslnyAppState extends State<WaslnyApp> with WidgetsBindingObserver {
           create: null,
           update: (context, auth, searchCity) =>
               SirvOfferProvider(token: auth.token),
+        ),
+        //         ChangeNotifierProxyProvider<Auth, AddProductProvider>(
+        //   create: null,
+        //   update: (context, auth, offerDetailsProvider) => AddProductProvider(
+        //     token: auth.token,
+        //   ),
+        // ),
+        ChangeNotifierProxyProvider<Auth, RemoveFromCartProvider>(
+          create: null,
+          update: (context, auth, offerDetailsProvider) =>
+              RemoveFromCartProvider(
+            token: auth.token,
+          ),
+        ),
+        ChangeNotifierProxyProvider<Auth, CartListProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              CartListProvider(token: auth.token),
+        ),
+        ChangeNotifierProxyProvider<Auth, UpdateIndexOfCartProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              UpdateIndexOfCartProvider(token: auth.token),
+        ),
+        ChangeNotifierProxyProvider<Auth, UpdateFavProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              UpdateFavProvider(token: auth.token),
+        ),
+        ChangeNotifierProxyProvider<Auth, FavouriteListProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              FavouriteListProvider(token: auth.token),
+        ),
+        ChangeNotifierProxyProvider<Auth, AddProductProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              AddProductProvider(token: auth.token),
+        ),
+        ChangeNotifierProxyProvider<Auth, SentLocationgProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              SentLocationgProvider(token: auth.token),
+        ),
+        ChangeNotifierProxyProvider<Auth, MyOrdersProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              MyOrdersProvider(token: auth.token),
+        ),
+        ChangeNotifierProxyProvider<Auth, EndOrderProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              EndOrderProvider(token: auth.token),
         ),
       ],
       child: GetMaterialApp(

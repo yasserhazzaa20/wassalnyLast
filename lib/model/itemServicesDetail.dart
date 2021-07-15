@@ -43,23 +43,56 @@ class ItemSirv {
 class Result {
   Result({
     this.allSlider,
+    this.allRate,
     this.serviceDetails,
   });
 
   List<AllSlider> allSlider;
+  List<AllRate> allRate;
   List<ServiceDetail> serviceDetails;
 
   factory Result.fromJson(Map<String, dynamic> json) => Result(
         allSlider: List<AllSlider>.from(
             json["all_slider"].map((x) => AllSlider.fromJson(x))),
+        allRate: List<AllRate>.from(
+            json["all_rate"].map((x) => AllRate.fromJson(x))),
         serviceDetails: List<ServiceDetail>.from(
             json["service_details"].map((x) => ServiceDetail.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
         "all_slider": List<dynamic>.from(allSlider.map((x) => x.toJson())),
+        "all_rate": List<dynamic>.from(allRate.map((x) => x.toJson())),
         "service_details":
             List<dynamic>.from(serviceDetails.map((x) => x.toJson())),
+      };
+}
+
+class AllRate {
+  AllRate({
+    this.username,
+    this.userrate,
+    this.usercomment,
+    this.rateId,
+  });
+
+  String username;
+  String userrate;
+  String usercomment;
+  int rateId;
+
+  factory AllRate.fromJson(Map<String, dynamic> json) => AllRate(
+        username: json["username"],
+        userrate: json["userrate"],
+        usercomment: json["usercomment"],
+        rateId: json["rate_id"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "username": username,
+        "userrate": userrate,
+        "usercomment": usercomment,
+        "rate_id": rateId,
       };
 }
 
@@ -85,8 +118,15 @@ class AllSlider {
 
 class ServiceDetail {
   ServiceDetail({
+    this.favExit,
+    this.totalRate,
     this.offersImage,
     this.serviceName,
+    this.scanDisplay,
+    this.pointsDisplay,
+    this.copounDisplay,
+    this.offersDisplay,
+    this.branchesDisplay,
     this.sliderType,
     this.deliveryOn,
     this.totalPoints,
@@ -101,15 +141,25 @@ class ServiceDetail {
     this.twitter,
     this.instagram,
     this.email,
+    this.website,
     this.lat,
     this.lag,
     this.address,
     this.description,
     this.id,
+    this.locationDisplay,
   });
 
+  int favExit;
+  String totalRate;
   String offersImage;
   String serviceName;
+  String scanDisplay;
+  String pointsDisplay;
+  String copounDisplay;
+  String locationDisplay;
+  String offersDisplay;
+  String branchesDisplay;
   String sliderType;
   String deliveryOn;
   String totalPoints;
@@ -124,14 +174,24 @@ class ServiceDetail {
   String twitter;
   String instagram;
   String email;
+  String website;
   String lat;
   String lag;
   String address;
   String description;
   int id;
+
   factory ServiceDetail.fromJson(Map<String, dynamic> json) => ServiceDetail(
+        favExit: json["fav_exit"],
+        totalRate: json["total_rate"],
         offersImage: json["offers_image"],
         serviceName: json["service_name"],
+        scanDisplay: json["scan_display"],
+        pointsDisplay: json["points_display"],
+        copounDisplay: json["copoun_display"],
+        offersDisplay: json["offers_display"],
+        branchesDisplay: json["branches_display"],
+        locationDisplay: json["location_display"],
         sliderType: json["slider_type"],
         deliveryOn: json["delivery_on"],
         totalPoints: json["total_points"],
@@ -146,6 +206,7 @@ class ServiceDetail {
         twitter: json["twitter"],
         instagram: json["instagram"],
         email: json["email"],
+        website: json["website"],
         lat: json["lat"],
         lag: json["lag"],
         address: json["address"],
@@ -154,8 +215,16 @@ class ServiceDetail {
       );
 
   Map<String, dynamic> toJson() => {
+        "fav_exit": favExit,
+        "total_rate": totalRate,
         "offers_image": offersImage,
         "service_name": serviceName,
+        "scan_display": scanDisplay,
+        "points_display": pointsDisplay,
+        "copoun_display": copounDisplay,
+        "offers_display": offersDisplay,
+        "branches_display": branchesDisplay,
+        "location_display": locationDisplay,
         "slider_type": sliderType,
         "delivery_on": deliveryOn,
         "total_points": totalPoints,
@@ -170,6 +239,7 @@ class ServiceDetail {
         "twitter": twitter,
         "instagram": instagram,
         "email": email,
+        "website": website,
         "lat": lat,
         "lag": lag,
         "address": address,
@@ -197,13 +267,23 @@ class ItemServicesDetail with ChangeNotifier {
   String description = '';
   String serviceName = '';
   String mainImg = '';
+  String viewOffer = '';
+  String viewCobon = '';
+  String viewPoints = '';
+  String viewBranches = '';
+  String viewScan = '';
+  String viewLocation = '';
   String img1 = '';
   String img2 = '';
   String img3 = '';
   String sliderType;
+  String web;
   String delivary;
   String videoLink;
+  String totalRate;
+  int isFav;
   List<ServiceDetail> serviceDetail = [];
+  List<AllRate> allRate = [];
   String points = '';
   // List<ResultRelated> result = [];
   List<AllSlider> allslider = [];
@@ -227,6 +307,14 @@ class ItemServicesDetail with ChangeNotifier {
       serviceDetail =
           itemSirvFromJson(response.toString()).result.serviceDetails;
       for (var i = 0; i < serviceDetail.length; i++) {
+        viewBranches = serviceDetail[i].branchesDisplay;
+        viewOffer = serviceDetail[i].offersDisplay;
+        viewPoints = serviceDetail[i].pointsDisplay;
+        viewScan = serviceDetail[i].scanDisplay;
+        viewCobon = serviceDetail[i].copounDisplay;
+        viewLocation = serviceDetail[i].locationDisplay;
+        isFav = serviceDetail[i].favExit;
+        totalRate = serviceDetail[i].totalRate;
         offersImage = serviceDetail[i].offersImage;
         facebook = serviceDetail[i].facebook;
         phone = serviceDetail[i].phone;
@@ -239,6 +327,7 @@ class ItemServicesDetail with ChangeNotifier {
         lat = serviceDetail[i].lat;
         lag = serviceDetail[i].lag;
         address = serviceDetail[i].address;
+        web = serviceDetail[i].website;
         description = serviceDetail[i].description;
         serviceName = serviceDetail[i].serviceName;
         mainImg = serviceDetail[i].offersImage;
@@ -256,6 +345,7 @@ class ItemServicesDetail with ChangeNotifier {
       //   idd = result[i].id;
       // }
       allslider = itemSirvFromJson(response.toString()).result.allSlider;
+      allRate = itemSirvFromJson(response.toString()).result.allRate;
     } catch (err) {
       // ignore: unnecessary_brace_in_string_interps
       print('${err} error from offers list');

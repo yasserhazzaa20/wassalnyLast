@@ -1,4 +1,5 @@
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:get/get.dart';
@@ -119,6 +120,8 @@ class _OfferssState extends State<Offerss> {
     List<AllOffer> list =
         Provider.of<AllOffersProvider>(context, listen: false).allOffers;
     List<AllOffer> list1 = list;
+    List<AllGallery> allGalleries =
+        Provider.of<AllOffersProvider>(context, listen: false).allGalleries;
     return Scaffold(
       key: _scafold,
       drawer: MyDrawer(),
@@ -288,17 +291,59 @@ class _OfferssState extends State<Offerss> {
                                               borderRadius:
                                                   BorderRadius.circular(15),
                                               child: Container(
-                                                  height: hight * 0.4,
-                                                  width: width * 0.5,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15),
-                                                  ),
-                                                  child: Image.network(
-                                                    list1[index].offerImage,
-                                                    fit: BoxFit.fill,
-                                                  )),
+                                                height: hight * 0.4,
+                                                width: width * 0.5,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(15),
+                                                ),
+                                                child: Carousel(
+                                                    images: allGalleries.map(
+                                                      (e) {
+                                                        return InkWell(
+                                                          onTap: () {
+                                                            showDialog(
+                                                              useSafeArea: true,
+                                                              context: context,
+                                                              builder:
+                                                                  (context) {
+                                                                return Carousel(
+                                                                  images: allGalleries
+                                                                      .map((e) => Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.all(8.0),
+                                                                            child:
+                                                                                Container(
+                                                                              child: Image.network(
+                                                                                e.offersImage,
+                                                                              ),
+                                                                            ),
+                                                                          ))
+                                                                      .toList(),
+                                                                  autoplay:
+                                                                      false,
+                                                                );
+                                                              },
+                                                            );
+                                                          },
+                                                          child: Image.network(
+                                                            e.offersImage,
+                                                            errorBuilder: (context,
+                                                                    error,
+                                                                    stackTrace) =>
+                                                                Image.asset(
+                                                                    'assets/images/logo.png'),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ).toList(),
+                                                    autoplay: true,
+                                                    dotSize: 7.0,
+                                                    dotColor: Colors.blue,
+                                                    indicatorBgPadding: 1.0,
+                                                    dotBgColor:
+                                                        Colors.transparent),
+                                              ),
                                             ),
                                             Text(list1[index].offerName),
                                             SizedBox(

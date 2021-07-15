@@ -32,10 +32,10 @@ class _SearchLatAndLagScreenState extends State<SearchLatAndLagScreen> {
     try {
       await provider.fetchSearch(
           widget.id, 100, 0, widget.lat, widget.lag, widget.searchType, lang);
-      // if (provider.searchLatAndLag.length >= nextLength)
-      //   _refreshController.loadComplete();
-      // else
-      //   _refreshController.loadNoData();
+      Get.snackbar('الاحداثيات', "long : ${widget.lag} , lat : ${widget.lat} ",
+          snackPosition: SnackPosition.BOTTOM,
+          instantInit: true,
+          duration: Duration(seconds: 10));
 
       setState(() {
         loader = false;
@@ -53,33 +53,9 @@ class _SearchLatAndLagScreenState extends State<SearchLatAndLagScreen> {
     }
   }
 
-  // Future<void> fetchMore(int number) async {
-  //   try {
-  //     var provider =
-  //         Provider.of<SearchLatAndLagProvider>(context, listen: false);
-  //     var nextLength = provider.searchLatAndLag.length + 20;
-  //     await provider.fetchSearch(widget.id, 20, number, widget.lat, widget.lag ,widget.searchType);
-
-  //     // _refreshController.refreshCompleted();
-  //     if (provider.searchLatAndLag.length >= nextLength)
-  //       _refreshController.loadComplete();
-  //     else
-  //       _refreshController.loadNoData();
-  //   } catch (error) {
-  //     print(error);
-  //     setState(() {
-  //       loader = false;
-  //     });
-  //     // _refreshController.refreshCompleted();
-  //     _refreshController.loadComplete();
-  //     throw (error);
-  //   }
-  // }
-
-  // int pageNumber = 0;
-  @override
   void initState() {
     future();
+
     super.initState();
   }
 
