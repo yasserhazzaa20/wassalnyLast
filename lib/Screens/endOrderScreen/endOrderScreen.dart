@@ -57,7 +57,7 @@ class _EndOrderScreenState extends State<EndOrderScreen> {
         qrWithFunctionDaialog(
           "DoneSendingOrder".tr,
           context,
-          "ok".tr,
+          "OrderDone".tr,
           () => Get.offAll(
             BottomNavyView(),
           ),

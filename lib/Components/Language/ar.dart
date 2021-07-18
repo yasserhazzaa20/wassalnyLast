@@ -138,6 +138,8 @@ Map<String, String> getArabicLanguage() {
     "comments": "التعليقات",
     "DoneSendingOrder": "تم تنفيذ الطلب بنجاح",
     "ShippingDetails": "تفاصيل الشحن",
-    "ChooseLocation": "اختر موقعك علي الخريطه"
+    "ChooseLocation": "اختر موقعك علي الخريطه",
+    "OrderDone": "تم إكتمال الطلب",
+    "adress2": "العنوان البديل",
   };
 }

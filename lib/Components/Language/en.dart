@@ -138,6 +138,8 @@ Map<String, String> getEnglishLanguage() {
     "comments": "comments",
     "DoneSendingOrder": "The request was successfully executed",
     "ShippingDetails": "Shipping Details",
-    "ChooseLocation": "Choose your location on the map"
+    "ChooseLocation": "Choose your location on the map",
+    "OrderDone": "Request completed successfully",
+    "adress2": "Alternate address",
   };
 }

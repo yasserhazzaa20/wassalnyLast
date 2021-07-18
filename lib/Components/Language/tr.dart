@@ -141,6 +141,8 @@ Map<String, String> getTurkishLanguage() {
     "comments": "yorum Yap",
     "DoneSendingOrder": "İstek başarıyla yürütüldü",
     "ShippingDetails": "Nakliye ayrıntıları",
-    "ChooseLocation": "Haritada konumunuzu seçin"
+    "ChooseLocation": "Haritada konumunuzu seçin",
+    "OrderDone": "Istek basarıyla tamamlandı",
+    "adress2": "Alternatif adres",
   };
 }

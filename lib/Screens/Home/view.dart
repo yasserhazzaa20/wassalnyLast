@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
@@ -11,9 +12,11 @@ import 'package:wassalny/Components/CustomWidgets/customTextField.dart';
 import 'package:wassalny/Components/CustomWidgets/showdialog.dart';
 import 'package:wassalny/Screens/CategoryList/view.dart';
 import 'package:wassalny/Screens/Filter/view.dart';
+import 'package:wassalny/Screens/cart/cart.dart';
 import 'package:wassalny/Screens/searchScreen/searchScreen.dart' as Search;
 import 'package:wassalny/Screens/service_details/servicesDetails.dart';
 import 'package:wassalny/model/addToFavourite.dart';
+import 'package:wassalny/model/cartProvider.dart' as Cart;
 import 'package:wassalny/model/home.dart';
 import 'package:wassalny/model/homeSearch.dart';
 
@@ -29,6 +32,27 @@ class _HomeState extends State<Home> {
   GlobalKey<ScaffoldState> _scafold2 = GlobalKey<ScaffoldState>();
   TextEditingController _search = TextEditingController();
   String lang = Get.locale.languageCode;
+
+  List<Cart.AllProduct> allProducts = [];
+  String currncy;
+  Future<void> future() async {
+    loader = true;
+    try {
+      allProducts =
+          await Provider.of<Cart.CartListProvider>(context, listen: false)
+              .fetchCart(lang);
+      for (var i = 0; i < allProducts.length; i++) {
+        print('${allProducts[i].price} price');
+        currncy = allProducts[i].currencyName;
+      }
+    } catch (error) {
+      print(error);
+      setState(() {
+        loader = false;
+      });
+      throw (error);
+    }
+  }
 
   Widget restaurant(String image) => Expanded(
         child: Container(
@@ -129,7 +153,21 @@ class _HomeState extends State<Home> {
                 InkWell(
                   onTap: _submit,
                   child: Icon(Icons.search, color: Colors.blue),
-                )
+                ),
+                InkWell(
+                    onTap: () => Get.to(
+                          () => CartScreen(),
+                        ),
+                    child: Badge(
+                      badgeContent: Text(
+                        allProducts.length.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      child: Icon(Icons.shopping_cart_outlined,
+                          color: Colors.blue),
+                    )),
               ],
             ),
           ),
@@ -228,7 +266,8 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    fechHome();
+    future().then((value) => fechHome());
+
     savedLang.write('lang', lang);
     super.initState();
   }
