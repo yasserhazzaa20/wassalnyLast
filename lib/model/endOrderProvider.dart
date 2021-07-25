@@ -20,6 +20,7 @@ class EndOrderProvider with ChangeNotifier {
     String phone,
     double lat,
     double lng,
+    int orderId,
   }) async {
     try {
       Dio.Response response = await dio().post(
@@ -31,7 +32,7 @@ class EndOrderProvider with ChangeNotifier {
             "fullname": name,
             "phone": phone,
             "lang": language,
-            "id_order": 1,
+            "id_order": orderId,
             "address": adress,
             "state_id": 1,
             "anther_address": anotherAdress,

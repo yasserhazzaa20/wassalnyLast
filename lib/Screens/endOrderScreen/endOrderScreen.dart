@@ -10,6 +10,9 @@ import 'package:wassalny/Screens/endOrderScreen/selectUrLocation.dart';
 import 'package:wassalny/model/endOrderProvider.dart';
 
 class EndOrderScreen extends StatefulWidget {
+  final int id;
+
+  const EndOrderScreen({Key key, this.id}) : super(key: key);
   @override
   _EndOrderScreenState createState() => _EndOrderScreenState();
 }
@@ -36,14 +39,14 @@ class _EndOrderScreenState extends State<EndOrderScreen> {
     try {
       done = await Provider.of<EndOrderProvider>(context, listen: false)
           .subscribtion(
-        adress: adress.text,
-        anotherAdress: anotherAdress.text,
-        language: lang,
-        name: name.text,
-        phone: phone.text,
-        lat: lat,
-        lng: lng,
-      );
+              adress: adress.text,
+              anotherAdress: anotherAdress.text,
+              language: lang,
+              name: name.text,
+              phone: phone.text,
+              lat: lat,
+              lng: lng,
+              orderId: widget.id);
     } on HttpExeption catch (error) {
       Navigator.of(context).pop();
       showErrorDaialog(error.message, context);

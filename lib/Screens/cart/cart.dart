@@ -406,7 +406,9 @@ class _CartScreenState extends State<CartScreen> {
                           alignment: Alignment.bottomCenter,
                           child: InkWell(
                             onTap: () => Get.to(
-                              () => EndOrderScreen(),
+                              () => EndOrderScreen(
+                                id: allProducts[0].idOrder,
+                              ),
                             ),
                             child: Container(
                               width: width,
