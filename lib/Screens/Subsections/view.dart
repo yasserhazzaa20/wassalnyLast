@@ -17,6 +17,9 @@ class Subsections extends StatefulWidget {
 class _SubsectionsState extends State<Subsections> {
   @override
   Widget build(BuildContext context) {
+    for (var i = 0; i < widget.items.length; i++) {
+      print(widget.items[i].departmentName);
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -96,6 +99,7 @@ class _SubsectionsState extends State<Subsections> {
                         ),
                         AutoSizeText(
                           widget.items[index].departmentName,
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,

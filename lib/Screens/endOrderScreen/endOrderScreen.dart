@@ -143,7 +143,7 @@ class _EndOrderScreenState extends State<EndOrderScreen> {
                       height: 10,
                     ),
                     ProfileTextField(
-                      hint: "adress".tr,
+                      hint: "adress2".tr,
                       controller: anotherAdress,
                     ),
                     SizedBox(
