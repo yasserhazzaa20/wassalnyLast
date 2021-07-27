@@ -361,7 +361,7 @@ class _ServicesDetailsState extends State<ServicesDetails> {
     final higt = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top);
     int isFav = Provider.of<ItemServicesDetail>(context, listen: false).isFav;
-    print(widget.id);
+    print('${info.viewMin} min');
     return Scaffold(
       appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.blue),
@@ -964,17 +964,19 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     color: Colors.blue,
-                                    onPressed: () {
-                                      Get.to(
-                                        Min(
-                                          id: info.idd,
-                                          title: info.menuTilte == null ||
-                                                  info.menuTilte == ''
-                                              ? "menu".tr
-                                              : info.menuTilte,
-                                        ),
-                                      );
-                                    },
+                                    onPressed: info.viewMin == '0'
+                                        ? null
+                                        : () {
+                                            Get.to(
+                                              Min(
+                                                id: info.idd,
+                                                title: info.menuTilte == null ||
+                                                        info.menuTilte == ''
+                                                    ? "menu".tr
+                                                    : info.menuTilte,
+                                              ),
+                                            );
+                                          },
                                     child: AutoSizeText(
                                       info.menuTilte == null ||
                                               info.menuTilte == ''

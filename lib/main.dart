@@ -9,11 +9,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
+  await GetStorage.init();
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
-  await GetStorage.init();
   await FCMConfig.instance
       .init(onBackgroundMessage: _firebaseMessagingBackgroundHandler);
 

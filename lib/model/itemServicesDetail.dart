@@ -148,6 +148,7 @@ class ServiceDetail {
     this.description,
     this.id,
     this.locationDisplay,
+    this.viewMin,
   });
 
   int favExit;
@@ -180,7 +181,7 @@ class ServiceDetail {
   String address;
   String description;
   int id;
-
+  String viewMin;
   factory ServiceDetail.fromJson(Map<String, dynamic> json) => ServiceDetail(
         favExit: json["fav_exit"],
         totalRate: json["total_rate"],
@@ -212,9 +213,11 @@ class ServiceDetail {
         address: json["address"],
         description: json["description"],
         id: json["id"],
+        viewMin: json["menu_display"],
       );
 
   Map<String, dynamic> toJson() => {
+        "menu_display": viewMin,
         "fav_exit": favExit,
         "total_rate": totalRate,
         "offers_image": offersImage,
@@ -270,6 +273,7 @@ class ItemServicesDetail with ChangeNotifier {
   String viewOffer = '';
   String viewCobon = '';
   String viewPoints = '';
+  String viewMin = '';
   String viewBranches = '';
   String viewScan = '';
   String viewLocation = '';
@@ -338,6 +342,7 @@ class ItemServicesDetail with ChangeNotifier {
         points = serviceDetail[i].totalPoints;
         idd = serviceDetail[i].id;
         menuTilte = serviceDetail[i].menuTitle;
+        viewMin = serviceDetail[i].viewMin;
       }
 
       // result = itemSirvFromJson(response.toString()).result.resultRelated;
