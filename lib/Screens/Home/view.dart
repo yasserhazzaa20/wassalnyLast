@@ -1,18 +1,27 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:badges/badges.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:provider/provider.dart';
 import 'package:wassalny/Components/CustomWidgets/customTextField.dart';
 import 'package:wassalny/Components/CustomWidgets/showdialog.dart';
 import 'package:wassalny/Screens/CategoryList/view.dart';
 import 'package:wassalny/Screens/Filter/view.dart';
+import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
+
 import 'package:wassalny/Screens/cart/cart.dart';
+import 'package:wassalny/Screens/searchLatAndLag/searchLatAndLagScreen.dart';
 import 'package:wassalny/Screens/searchScreen/searchScreen.dart' as Search;
 import 'package:wassalny/Screens/service_details/servicesDetails.dart';
 import 'package:wassalny/model/addToFavourite.dart';
@@ -35,23 +44,66 @@ class _HomeState extends State<Home> {
 
   List<Cart.AllProduct> allProducts = [];
   String currncy;
+  bool _loader = true;
+  var location = Location();
+  double currentLat;
+  double currentLong;
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
+  LocationData _locationData;
+  Future _getCurrentLocation() async {
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    _locationData = await location.getLocation();
+    final coordinates =
+        new Coordinates(_locationData.latitude, _locationData.longitude);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    print(
+        'locationsss: ${first.locality}, ${first.adminArea},${first.subLocality}, ${first.subAdminArea},${first.addressLine}, ${first.featureName},${first.thoroughfare}, ${first.subThoroughfare}');
+    setState(() {
+      currentLat = _locationData.latitude;
+      currentLong = _locationData.longitude;
+    });
+    setState(() {
+      _loader = false;
+    });
+    print(currentLat);
+    print(currentLong);
+  }
+
   Future<void> future() async {
     loader = true;
-    try {
-      allProducts =
-          await Provider.of<Cart.CartListProvider>(context, listen: false)
-              .fetchCart(lang);
-      for (var i = 0; i < allProducts.length; i++) {
-        print('${allProducts[i].price} price');
-        currncy = allProducts[i].currencyName;
-      }
-    } catch (error) {
-      print(error);
-      setState(() {
-        loader = false;
-      });
-      throw (error);
+    // try {
+    allProducts =
+        await Provider.of<Cart.CartListProvider>(context, listen: false)
+            .fetchCart(lang);
+    for (var i = 0; i < allProducts.length; i++) {
+      print('${allProducts[i].price} price');
+      currncy = allProducts[i].currencyName;
     }
+    // } catch (error) {
+    //   print(error);
+    //   setState(() {
+    //     loader = false;
+    //   });
+    //   throw (error);
+    // }
   }
 
   Widget restaurant(String image) => Expanded(
@@ -107,7 +159,7 @@ class _HomeState extends State<Home> {
     final hight = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top);
 
-    List<Offer> sliderImageInMain =
+    List<MainOffers> sliderImageInMain =
         Provider.of<HomeLists>(context, listen: false).sliderImageInMain;
     return Padding(
       padding: EdgeInsets.only(
@@ -192,8 +244,8 @@ class _HomeState extends State<Home> {
                                   : () async {
                                       await launch('http:${e.link}');
                                     },
-                          child: Image.network(
-                            e.image,
+                          child: CachedNetworkImage(
+                            imageUrl: e.image,
                             fit: BoxFit.fill,
                           ),
                         );
@@ -219,12 +271,26 @@ class _HomeState extends State<Home> {
     AllRecommended selected = allrecommended.firstWhere(
         (element) => element.recommendedPosition == position,
         orElse: () => null);
-
     return selected;
   }
 
   bool loader = false;
   final savedLang = GetStorage();
+
+  // Future<void> fetchLocalDatabase() async {
+  //   loader = true;
+  //   try {
+  //     await Provider.of<HomeLists>(context, listen: false)
+  //         .fetchLocalDataBase(lang)
+  //         .then((_) {
+  //       setState(() {
+  //         loader = false;
+  //       });
+  //     });
+  //   } catch (error) {
+  //     // showErrorDaialog("NoInternet".tr, context);
+  //   }
+  // }
 
   Future<void> fechHome() async {
     loader = true;
@@ -237,7 +303,7 @@ class _HomeState extends State<Home> {
         });
       });
     } catch (error) {
-      showErrorDaialog("NoInternet".tr, context);
+      // showErrorDaialog("NoInternet".tr, context);
     }
   }
 
@@ -266,7 +332,11 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    future().then((value) => fechHome());
+    future().then((value) {
+      _getCurrentLocation();
+      // fetchLocalDatabase();
+      fechHome();
+    });
 
     savedLang.write('lang', lang);
     super.initState();
@@ -278,18 +348,21 @@ class _HomeState extends State<Home> {
     final width = (MediaQuery.of(context).size.width);
     final hight = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top);
-    List<AllCategory> allCategories =
+    List<AllCategories> allCategories =
         Provider.of<HomeLists>(context).allCategories;
-    List<AllFeature> allfeature =
+    List<AllFeatures> allfeature =
         Provider.of<HomeLists>(context, listen: false).allfeature;
-    List<Offer> secondSlider =
+    print(allfeature);
+    List<MainOffers> secondSlider =
         Provider.of<HomeLists>(context, listen: false).secondSlider;
     String recomendedString =
         Provider.of<HomeLists>(context, listen: false).recomendedString;
     return Scaffold(
       // backgroundColor: Colors.grey[100],
       key: _scafold2,
-      drawer: MyDrawer(),
+      drawer: MyDrawer(
+        products: allProducts,
+      ),
       body: loader
           ? Center(
               child: CircularProgressIndicator(
@@ -325,17 +398,24 @@ class _HomeState extends State<Home> {
                               horizontal: width * 0.02, vertical: hight * 0.01),
                           child: GestureDetector(
                             onTap: () {
-                              Get.to(
-                                ServicesDetails(
-                                  id: chonsenOne(1).serviceId,
-                                ),
-                              );
+                              if (chonsenOne(1).depId != null)
+                                Get.to(
+                                    // ServicesDetails(
+                                    //   id: chonsenOne(1).serviceId,
+                                    // ),
+                                    SearchLatAndLagScreen(
+                                  catId: chonsenOne(1).depId,
+                                  lat: currentLat,
+                                  lag: currentLong,
+                                  searchType: 2,
+                                ));
                             },
                             child: Container(
                               width: width * 0.4,
-                              child: FadeInImage.assetNetwork(
-                                placeholder: 'assets/images/logo.png',
-                                image: chonsenOne(1).recommendedImage == null
+                              child: CachedNetworkImage(
+                                placeholder: (context, url) =>
+                                    Image.asset('assets/images/logo.png'),
+                                imageUrl: chonsenOne(1).recommendedImage == null
                                     ? SizedBox()
                                     : chonsenOne(1).recommendedImage,
                                 fit: BoxFit.fill,
@@ -353,18 +433,21 @@ class _HomeState extends State<Home> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  Get.to(
-                                    ServicesDetails(
-                                      id: chonsenOne(2).serviceId,
-                                    ),
-                                  );
+                                  if (chonsenOne(2).depId != null)
+                                    Get.to(SearchLatAndLagScreen(
+                                      catId: chonsenOne(2).depId,
+                                      lat: currentLat,
+                                      lag: currentLong,
+                                      searchType: 2,
+                                    ));
                                 },
                                 child: Container(
                                   height: hight * 0.06,
                                   width: width * 0.20,
-                                  child: FadeInImage.assetNetwork(
-                                    placeholder: 'assets/images/logo.png',
-                                    image:
+                                  child: CachedNetworkImage(
+                                    placeholder: (context, url) =>
+                                        Image.asset('assets/images/logo.png'),
+                                    imageUrl:
                                         chonsenOne(2).recommendedImage == null
                                             ? SizedBox()
                                             : chonsenOne(2).recommendedImage,
@@ -374,19 +457,22 @@ class _HomeState extends State<Home> {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  Get.to(
-                                    ServicesDetails(
-                                      id: chonsenOne(6).serviceId,
-                                    ),
-                                  );
+                                  if (chonsenOne(6).depId != null)
+                                    Get.to(SearchLatAndLagScreen(
+                                      catId: chonsenOne(6).depId,
+                                      lat: currentLat,
+                                      lag: currentLong,
+                                      searchType: 2,
+                                    ));
                                 },
                                 child: Container(
                                   color: Colors.red,
                                   height: hight * 0.06,
                                   width: width * 0.20,
-                                  child: FadeInImage.assetNetwork(
-                                    placeholder: 'assets/images/logo.png',
-                                    image:
+                                  child: CachedNetworkImage(
+                                    placeholder: (context, url) =>
+                                        Image.asset('assets/images/logo.png'),
+                                    imageUrl:
                                         chonsenOne(6).recommendedImage == null
                                             ? SizedBox()
                                             : chonsenOne(6).recommendedImage,
@@ -412,14 +498,20 @@ class _HomeState extends State<Home> {
                                   children: [
                                     GestureDetector(
                                       onTap: () {
-                                        Get.to(ServicesDetails(
-                                          id: chonsenOne(3).serviceId,
-                                        ));
+                                        if (chonsenOne(3).depId != null)
+                                          Get.to(SearchLatAndLagScreen(
+                                            catId: chonsenOne(3).depId,
+                                            lat: currentLat,
+                                            lag: currentLong,
+                                            searchType: 2,
+                                          ));
                                       },
                                       child: Container(
-                                        child: FadeInImage.assetNetwork(
-                                          placeholder: 'assets/images/logo.png',
-                                          image: chonsenOne(3)
+                                        child: CachedNetworkImage(
+                                          placeholder: (context, url) =>
+                                              Image.asset(
+                                                  'assets/images/logo.png'),
+                                          imageUrl: chonsenOne(3)
                                                       .recommendedImage ==
                                                   null
                                               ? SizedBox()
@@ -432,16 +524,20 @@ class _HomeState extends State<Home> {
                                     ),
                                     GestureDetector(
                                       onTap: () {
-                                        Get.to(
-                                          ServicesDetails(
-                                            id: chonsenOne(4).serviceId,
-                                          ),
-                                        );
+                                        if (chonsenOne(4).depId != null)
+                                          Get.to(SearchLatAndLagScreen(
+                                            catId: chonsenOne(4).depId,
+                                            lat: currentLat,
+                                            lag: currentLong,
+                                            searchType: 2,
+                                          ));
                                       },
                                       child: Container(
-                                        child: FadeInImage.assetNetwork(
-                                          placeholder: 'assets/images/logo.png',
-                                          image: chonsenOne(4)
+                                        child: CachedNetworkImage(
+                                          placeholder: (context, url) =>
+                                              Image.asset(
+                                                  'assets/images/logo.png'),
+                                          imageUrl: chonsenOne(4)
                                                       .recommendedImage ==
                                                   null
                                               ? SizedBox()
@@ -457,18 +553,21 @@ class _HomeState extends State<Home> {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  Get.to(
-                                    ServicesDetails(
-                                      id: chonsenOne(5).serviceId,
-                                    ),
-                                  );
+                                  if (chonsenOne(5).depId != null)
+                                    Get.to(SearchLatAndLagScreen(
+                                      catId: chonsenOne(5).depId,
+                                      lat: currentLat,
+                                      lag: currentLong,
+                                      searchType: 1,
+                                    ));
                                 },
                                 child: Container(
                                   height: hight * 0.06,
                                   width: width * 0.22,
-                                  child: FadeInImage.assetNetwork(
-                                    placeholder: 'assets/images/logo.png',
-                                    image:
+                                  child: CachedNetworkImage(
+                                    placeholder: (context, url) =>
+                                        Image.asset('assets/images/logo.png'),
+                                    imageUrl:
                                         chonsenOne(5).recommendedImage == null
                                             ? SizedBox()
                                             : chonsenOne(5).recommendedImage,
@@ -513,8 +612,8 @@ class _HomeState extends State<Home> {
                                           : () async {
                                               await launch('http:${e.link}');
                                             },
-                                      child: Image.network(
-                                        e.image,
+                                      child: CachedNetworkImage(
+                                        imageUrl: e.image,
                                         fit: BoxFit.fill,
                                       ),
                                     );
@@ -562,126 +661,126 @@ class _HomeState extends State<Home> {
                       //     ),
                       //   ),
                       // ),
-                      SizedBox(height: 30),
-                      ...allfeature.map((items) {
-                        // ignore: unused_element
-                        int mainId() {
-                          for (var i = 0; i < allCategories.length; i++) {
-                            if (allCategories[i].allDepartment.length > 0) {
-                              mainIDN = 0;
-                            } else {
-                              mainIDN = 1;
-                            }
-                          }
-                          return mainIDN;
-                        }
-
-                        return Container(
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsetsDirectional.only(
-                                        start: 10),
-                                    child: Text(
-                                      items.categoryName,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 25),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(15),
-                                        color: Colors.blue.withAlpha(40),
-                                        image: DecorationImage(
-                                            image: NetworkImage(
-                                                items.categoryImage),
-                                            fit: BoxFit.fill),
-                                      ),
-                                      height: 90,
-                                      width: 90),
-                                ],
-                              ),
-                              SizedBox(height: 20),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: items.allProducts.map((e) {
-                                    // print("${e.productImage} image");
-                                    return Column(children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          Get.to(
-                                            ServicesDetails(
-                                              id: e.prodId,
-                                            ),
-                                          );
-                                        },
-                                        child: Container(
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: width * 0.015),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(15),
-                                          ),
-                                          height: 100,
-                                          width: 100,
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(15),
-                                            child: Image.network(
-                                              e.productImage,
-                                              fit: BoxFit.fill,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          IconButton(
-                                              onPressed: () =>
-                                                  _sentFav(e.favExit, e.prodId),
-                                              icon: e.favExit == 0
-                                                  ? Icon(
-                                                      CupertinoIcons.heart,
-                                                      color: Colors.red,
-                                                    )
-                                                  : Icon(
-                                                      CupertinoIcons.heart_fill,
-                                                      color: Colors.red,
-                                                    )),
-                                          SizedBox(
-                                            width: 8,
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow,
-                                          ),
-                                          e.totalRate == '' ||
-                                                  e.totalRate == null
-                                              ? Text('0')
-                                              : Text(e.totalRate),
-                                        ],
-                                      ),
-                                      Text(e.productName),
-                                      SizedBox(
-                                        width: 15,
-                                      )
-                                    ]);
-                                  }).toList(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
+                      // SizedBox(height: 30),
+                      // ...allfeature.map((items) {
+                      //   // ignore: unused_element
+                      //   int mainId() {
+                      //     for (var i = 0; i < allCategories.length; i++) {
+                      //       if (allCategories[i].allDepartment.length > 0) {
+                      //         mainIDN = 0;
+                      //       } else {
+                      //         mainIDN = 1;
+                      //       }
+                      //     }
+                      //     return mainIDN;
+                      //   }
+                      //
+                      //   return Container(
+                      //     child: Column(
+                      //       children: [
+                      //         Row(
+                      //           children: [
+                      //             Padding(
+                      //               padding: const EdgeInsetsDirectional.only(
+                      //                   start: 10),
+                      //               child: Text(
+                      //                 items.categoryName,
+                      //                 style: TextStyle(
+                      //                     fontWeight: FontWeight.bold,
+                      //                     fontSize: 25),
+                      //               ),
+                      //             ),
+                      //             Spacer(),
+                      //             Container(
+                      //                 decoration: BoxDecoration(
+                      //                   borderRadius: BorderRadius.circular(15),
+                      //                   color: Colors.blue.withAlpha(40),
+                      //                   image: DecorationImage(
+                      //                       image: CachedNetworkImageProvider(
+                      //                           items.categoryImage),
+                      //                       fit: BoxFit.fill),
+                      //                 ),
+                      //                 height: 90,
+                      //                 width: 90),
+                      //           ],
+                      //         ),
+                      //         SizedBox(height: 20),
+                      //         // SingleChildScrollView(
+                      //         //   scrollDirection: Axis.horizontal,
+                      //         //   child: Row(
+                      //         //     mainAxisAlignment:
+                      //         //         MainAxisAlignment.spaceAround,
+                      //         //     children: items.allProducts.map((e) {
+                      //         //       // print("${e.productImage} image");
+                      //         //       return Column(children: [
+                      //         //         GestureDetector(
+                      //         //           onTap: () {
+                      //         //             Get.to(
+                      //         //               ServicesDetails(
+                      //         //                 id: e.prodId,
+                      //         //               ),
+                      //         //             );
+                      //         //           },
+                      //         //           child: Container(
+                      //         //             margin: EdgeInsets.symmetric(
+                      //         //                 horizontal: width * 0.015),
+                      //         //             decoration: BoxDecoration(
+                      //         //               borderRadius:
+                      //         //                   BorderRadius.circular(15),
+                      //         //             ),
+                      //         //             height: 100,
+                      //         //             width: 100,
+                      //         //             child: ClipRRect(
+                      //         //               borderRadius:
+                      //         //                   BorderRadius.circular(15),
+                      //         //               child: CachedNetworkImage(
+                      //         //                 imageUrl: e.productImage,
+                      //         //                 fit: BoxFit.fill,
+                      //         //               ),
+                      //         //             ),
+                      //         //           ),
+                      //         //         ),
+                      //         //         Row(
+                      //         //           mainAxisAlignment:
+                      //         //               MainAxisAlignment.center,
+                      //         //           children: [
+                      //         //             IconButton(
+                      //         //                 onPressed: () =>
+                      //         //                     _sentFav(e.favExit, e.prodId),
+                      //         //                 icon: e.favExit == 0
+                      //         //                     ? Icon(
+                      //         //                         CupertinoIcons.heart,
+                      //         //                         color: Colors.red,
+                      //         //                       )
+                      //         //                     : Icon(
+                      //         //                         CupertinoIcons.heart_fill,
+                      //         //                         color: Colors.red,
+                      //         //                       )),
+                      //         //             SizedBox(
+                      //         //               width: 8,
+                      //         //             ),
+                      //         //             Icon(
+                      //         //               Icons.star,
+                      //         //               color: Colors.yellow,
+                      //         //             ),
+                      //         //             e.totalRate == '' ||
+                      //         //                     e.totalRate == null
+                      //         //                 ? Text('0')
+                      //         //                 : Text(e.totalRate),
+                      //         //           ],
+                      //         //         ),
+                      //         //         Text(e.productName),
+                      //         //         SizedBox(
+                      //         //           width: 15,
+                      //         //         )
+                      //         //       ]);
+                      //         //     }).toList(),
+                      //         //   ),
+                      //         // ),
+                      //       ],
+                      //     ),
+                      //   );
+                      // }).toList(),
                     ],
                   ),
                 ),

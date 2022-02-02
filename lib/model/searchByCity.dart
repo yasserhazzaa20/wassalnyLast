@@ -69,6 +69,8 @@ class AllProductCC {
     this.productName,
     this.phone,
     this.prodId,
+    this.favExit,
+    this.totalRate,
     this.delivery,
   });
 
@@ -77,12 +79,16 @@ class AllProductCC {
   String phone;
   int prodId;
   int delivery;
+  String totalRate;
+  int favExit;
 
   factory AllProductCC.fromJson(Map<String, dynamic> json) => AllProductCC(
         productImage: json["product_image"],
         productName: json["product_name"],
         phone: json["phone"],
         prodId: json["prod_id"],
+        favExit: json["fav_exit"],
+        totalRate: json["total_rate"],
         delivery: json["delivery"],
       );
 
@@ -91,6 +97,8 @@ class AllProductCC {
         "product_name": productName,
         "phone": phone,
         "prod_id": prodId,
+        "total_rate": totalRate,
+        "fav_exit": favExit,
         "delivery": delivery,
       };
 }

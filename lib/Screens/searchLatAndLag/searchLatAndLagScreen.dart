@@ -1,18 +1,22 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:wassalny/Components/CustomWidgets/showdialog.dart';
 import 'package:wassalny/Screens/service_details/servicesDetails.dart';
+import 'package:wassalny/model/addToFavourite.dart';
 import 'package:wassalny/model/searchLAndLat.dart';
 
 // package:wasalny/Screens/service_details/servicesDetails.dart
 
 class SearchLatAndLagScreen extends StatefulWidget {
-  final int id;
+  final int catId;
   final double lat;
   final double lag;
   final int searchType;
-  const SearchLatAndLagScreen({this.id, this.lag, this.lat, this.searchType});
+  const SearchLatAndLagScreen(
+      {this.catId, this.lag, this.lat, this.searchType});
 
   @override
   _SearchLatAndLagScreenState createState() => _SearchLatAndLagScreenState();
@@ -21,8 +25,30 @@ class SearchLatAndLagScreen extends StatefulWidget {
 class _SearchLatAndLagScreenState extends State<SearchLatAndLagScreen> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  bool loader = false;
+  bool loader;
   String lang = Get.locale.languageCode;
+
+  Future<void> _sentFav(int isFav, int productId) async {
+    bool done =
+        Provider.of<UpdateFavProvider>(context, listen: false).doneSenting;
+
+    try {
+      done = await Provider.of<UpdateFavProvider>(context, listen: false)
+          .updateFav(
+        key: isFav == 0 ? '1' : '2',
+        id: productId,
+      );
+
+      // ignore: unused_catch_clause
+    } catch (error) {
+      print(error);
+      Navigator.of(context).pop();
+      showErrorDaialog('No internet connection', context);
+    }
+    if (done) {
+      future();
+    }
+  }
 
   Future<void> future() async {
     loader = true;
@@ -31,7 +57,13 @@ class _SearchLatAndLagScreenState extends State<SearchLatAndLagScreen> {
     // var nextLength = provider.searchLatAndLag.length + 20;
     try {
       await provider.fetchSearch(
-          widget.id, 100, 0, widget.lat, widget.lag, widget.searchType, lang);
+          catId: widget.catId,
+          limt: 100,
+          pageNumber: 0,
+          lat: widget.lat,
+          lag: widget.lag,
+          searchType: widget.searchType,
+          lang: lang);
       Get.snackbar('الاحداثيات', "long : ${widget.lag} , lat : ${widget.lat} ",
           snackPosition: SnackPosition.BOTTOM,
           instantInit: true,
@@ -64,7 +96,7 @@ class _SearchLatAndLagScreenState extends State<SearchLatAndLagScreen> {
     final width = (MediaQuery.of(context).size.width);
     final hight = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top);
-    print(widget.id);
+    print(widget.catId);
     final List<AllProduct> list =
         Provider.of<SearchLatAndLagProvider>(context).searchLatAndLag;
     return Scaffold(
@@ -100,9 +132,8 @@ class _SearchLatAndLagScreenState extends State<SearchLatAndLagScreen> {
                       scrollDirection: Axis.vertical,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisSpacing: 0,
-                        childAspectRatio:
-                            MediaQuery.of(context).size.width * .0025,
                         crossAxisCount: 2,
+                        childAspectRatio: 0.7,
                         mainAxisSpacing: 0,
                       ),
                       itemCount: list.length,
@@ -122,7 +153,7 @@ class _SearchLatAndLagScreenState extends State<SearchLatAndLagScreen> {
                                     borderRadius: BorderRadius.circular(15),
                                     color: Colors.white,
                                     image: DecorationImage(
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.fill,
                                       image: NetworkImage(
                                           list[index].productImage),
                                     ),
@@ -130,6 +161,37 @@ class _SearchLatAndLagScreenState extends State<SearchLatAndLagScreen> {
                                   height: hight * 0.2,
                                   width:
                                       MediaQuery.of(context).size.width * .3),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                      onPressed: () {
+                                        _sentFav(list[index].favExit,
+                                            list[index].prodId);
+                                        setState(() {});
+                                      },
+                                      icon: list[index].favExit == 0
+                                          ? Icon(
+                                              CupertinoIcons.heart,
+                                              color: Colors.red,
+                                            )
+                                          : Icon(
+                                              CupertinoIcons.heart_fill,
+                                              color: Colors.red,
+                                            )),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Icon(
+                                    Icons.star,
+                                    color: Colors.yellow,
+                                  ),
+                                  list[index].totalRate == '' ||
+                                          list[index].totalRate == null
+                                      ? Text('0')
+                                      : Text(list[index].totalRate),
+                                ],
+                              ),
                               Text(list[index].productName,
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,

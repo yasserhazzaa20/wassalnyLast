@@ -2,6 +2,7 @@ import 'package:dio/dio.dart' as Dio;
 import 'package:flutter/material.dart';
 
 import 'package:wassalny/Components/networkExeption.dart';
+import 'package:wassalny/model/states_model.dart';
 import 'package:wassalny/network/auth/dio.dart';
 
 class EndOrderProvider with ChangeNotifier {
@@ -21,6 +22,7 @@ class EndOrderProvider with ChangeNotifier {
     double lat,
     double lng,
     int orderId,
+    int stateId,
   }) async {
     try {
       Dio.Response response = await dio().post(
@@ -34,7 +36,7 @@ class EndOrderProvider with ChangeNotifier {
             "lang": language,
             "id_order": orderId,
             "address": adress,
-            "state_id": 1,
+            "state_id": stateId,
             "anther_address": anotherAdress,
             "order_status": 1,
             "time_execution_request": DateTime.now(),
@@ -53,6 +55,27 @@ class EndOrderProvider with ChangeNotifier {
       return doneSub;
     } catch (e) {
       throw (e);
+    }
+  }
+
+  Future<List<CityDetails>> getStates(String lang) async {
+    try {
+      Dio.Response response = await dio().post(
+        'store/preperation_order_details',
+        data: Dio.FormData.fromMap(
+          {
+            'key': 1234567890,
+            'token_id': token,
+            "lang": lang,
+          },
+        ),
+      );
+      print(response.data);
+      return StatesModel.fromJson(response.data).result.cityDetails;
+    } catch (err) {
+      // ignore: unnecessary_brace_in_string_interps
+      print(err);
+      return err;
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:wassalny/Components/CustomWidgets/CustomButton.dart';
@@ -8,6 +9,7 @@ import 'package:wassalny/Components/CustomWidgets/myColors.dart';
 import 'package:wassalny/Components/CustomWidgets/showdialog.dart';
 import 'package:wassalny/Components/networkExeption.dart';
 import 'package:wassalny/Screens/BattomBar/view.dart';
+import 'package:wassalny/Screens/forget_password/forget_password_screen.dart';
 import 'package:wassalny/Screens/register/register.dart';
 import 'package:wassalny/model/user.dart';
 import 'package:wassalny/network/auth/auth.dart';
@@ -19,9 +21,12 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   TextEditingController _phone = TextEditingController();
+  TextEditingController _Password = TextEditingController();
 
   User user = User();
   String language;
+  bool isPassword = true;
+  IconData icon = Icons.visibility;
 
   Widget dropList() {
     return InkWell(
@@ -53,6 +58,7 @@ class _LoginState extends State<Login> {
   Future<void> _submit() async {
     bool auth = Provider.of<Auth>(context, listen: false).loggedIn;
     user.phone = _phone.text;
+    user.oldPassword = _Password.text;
     showDaialogLoader(context);
     try {
       auth = await Provider.of<Auth>(context, listen: false).signIn(user);
@@ -85,10 +91,27 @@ class _LoginState extends State<Login> {
           SizedBox(height: 10),
           CustomTextField(
               controller: _phone,
-              hint: "phone".tr,
+              hint: "phoneNumber".tr,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
+              ],
               textDirection: TextDirection.ltr,
               type: TextInputType.phone),
           SizedBox(height: 10),
+          CustomTextField(
+              controller: _Password,
+              hint: "password".tr,
+              isPassword: isPassword,
+              suffixIcon: icon,
+              suffixPress: () {
+                isPassword = !isPassword;
+                isPassword
+                    ? icon = Icons.visibility
+                    : icon = Icons.visibility_off_outlined;
+                setState(() {});
+              },
+              textDirection: TextDirection.ltr,
+              type: TextInputType.visiblePassword),
           // CustomTextField(controller: _address, hint: 'العنوان'),
           // SizedBox(height: 10),
           // dropList(),
@@ -102,6 +125,21 @@ class _LoginState extends State<Login> {
               label: 'login'.tr),
           SizedBox(
             height: 100,
+          ),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                Get.to(ForgetPasswordScreen());
+              },
+              child: Text(
+                "forgetPassword".tr,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    color: Colors.red,
+                    fontFamily: 'GE-Snd-Book'),
+              ),
+            ),
           ),
           InkWell(
             onTap: () {

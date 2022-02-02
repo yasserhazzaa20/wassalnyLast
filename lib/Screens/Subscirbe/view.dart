@@ -57,10 +57,10 @@ class _SubscribeState extends State<Subscribe> {
 
   @override
   Widget build(BuildContext context) {
-    List<AllCategory> allCategories =
+    List<AllCategories> allCategories =
         Provider.of<HomeLists>(context).allCategories;
 
-    List<AllCategory> cities = allCategories;
+    List<AllCategories> cities = allCategories;
     return Scaffold(
       appBar: titleAppBar(context, "SubscribeWithUs".tr),
       body: SingleChildScrollView(
@@ -213,7 +213,7 @@ class _SubscribeState extends State<Subscribe> {
   //       });
   // }
 
-  Widget citiesWidget(BuildContext context, List<AllCategory> cities) {
+  Widget citiesWidget(BuildContext context, List<AllCategories> cities) {
     return ListView.builder(
       itemCount: cities.length,
       shrinkWrap: true,

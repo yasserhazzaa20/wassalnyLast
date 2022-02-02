@@ -205,67 +205,52 @@ class _ServicesOffersState extends State<ServicesOffers> {
                                           borderRadius:
                                               BorderRadius.circular(15),
                                           child: Container(
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.4,
-                                            width: width * 0.5,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                            ),
-                                            child: Carousel(
-                                                boxFit: BoxFit.fill,
-                                                images: [
-                                                  '${offers[index].offerImage}'
-                                                ].map(
-                                                  (e) {
-                                                    return InkWell(
-                                                      onTap: () {
-                                                        showDialog(
-                                                          useSafeArea: true,
-                                                          context: context,
-                                                          builder: (context) {
-                                                            return Carousel(
-                                                              images: [
-                                                                '${offers[index].offerImage}'
-                                                              ]
-                                                                  .map((e) =>
-                                                                      Padding(
-                                                                        padding:
-                                                                            const EdgeInsets.all(8.0),
-                                                                        child:
-                                                                            Container(
-                                                                          child:
-                                                                              Image.network(
-                                                                            e,
-                                                                          ),
-                                                                        ),
-                                                                      ))
-                                                                  .toList(),
-                                                              autoplay: false,
-                                                            );
-                                                          },
-                                                        );
-                                                      },
-                                                      child: Image.network(
-                                                        e,
-                                                        fit: BoxFit.fill,
-                                                        errorBuilder: (context,
-                                                                error,
-                                                                stackTrace) =>
-                                                            Image.asset(
-                                                                'assets/images/logo.png'),
-                                                      ),
-                                                    );
-                                                  },
-                                                ).toList(),
-                                                autoplay: true,
-                                                dotSize: 7.0,
-                                                dotColor: Colors.blue,
-                                                indicatorBgPadding: 1.0,
-                                                dotBgColor: Colors.transparent),
-                                          ),
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.4,
+                                              width: width * 0.5,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                              ),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  showDialog(
+                                                    useSafeArea: true,
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return Carousel(
+                                                        images: offers[index]
+                                                            .allGalleries
+                                                            .map((e) => Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                              .all(
+                                                                          8.0),
+                                                                  child:
+                                                                      Container(
+                                                                    child: Image
+                                                                        .network(
+                                                                      e.offersImage,
+                                                                    ),
+                                                                  ),
+                                                                ))
+                                                            .toList(),
+                                                        autoplay: false,
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                                child: Image.network(
+                                                  offers[index].offerImage,
+                                                  fit: BoxFit.fill,
+                                                  errorBuilder: (context, error,
+                                                          stackTrace) =>
+                                                      Image.asset(
+                                                          'assets/images/logo.png'),
+                                                ),
+                                              )),
                                         ),
                                         Text(offers[index].offerName)
                                       ],

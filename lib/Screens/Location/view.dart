@@ -36,7 +36,7 @@ class _MapPageState extends State<MapPage> {
   );
   Set<Marker> mark = Set();
   BitmapDescriptor pinLocationIcon;
-  bool _loader = true;
+  bool _loader = false;
   var location = Location();
   _setAddMarker(position) async {
     setState(() {
@@ -53,6 +53,7 @@ class _MapPageState extends State<MapPage> {
   PermissionStatus _permissionGranted;
   LocationData _locationData;
   Future _getCurrentLocation() async {
+    _loader = true;
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
@@ -82,9 +83,7 @@ class _MapPageState extends State<MapPage> {
       currentLong = _locationData.longitude;
       currentAddress = first.addressLine;
     });
-    setState(() {
-      _loader = false;
-    });
+    _loader = false;
   }
 
   void initState() {
@@ -97,9 +96,8 @@ class _MapPageState extends State<MapPage> {
       onTap: () {
         print(currentLong);
         print(currentLat);
-
         Get.to(() => SearchLatAndLagScreen(
-              id: widget.id,
+              catId: widget.id,
               lag: currentLong,
               lat: currentLat,
               searchType: widget.searchType,

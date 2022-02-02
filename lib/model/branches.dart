@@ -71,6 +71,7 @@ class AllProducts {
     this.phoneSecond,
     this.phoneThird,
     this.prodId,
+    this.favExit,
     this.lat,
     this.lag,
     this.address,
@@ -83,6 +84,7 @@ class AllProducts {
   String phoneSecond;
   String phoneThird;
   int prodId;
+  int favExit;
   String lat;
   String lag;
   String address;
@@ -95,6 +97,7 @@ class AllProducts {
         phoneSecond: json["phone_second"],
         phoneThird: json["phone_third"],
         prodId: json["prod_id"],
+        favExit: json["fav_exit"],
         lat: json["lat"],
         lag: json["lag"],
         address: json["address"],
@@ -108,6 +111,7 @@ class AllProducts {
         "phone_second": phoneSecond,
         "phone_third": phoneThird,
         "prod_id": prodId,
+        "fav_exit": favExit,
         "lat": lat,
         "lag": lag,
         "address": address,

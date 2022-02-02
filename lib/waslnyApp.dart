@@ -1,3 +1,4 @@
+import 'package:fcm_config/fcm_config.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,9 @@ import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:provider/provider.dart';
+import 'package:wassalny/Screens/Offerss/view.dart';
+import 'package:wassalny/customNoti.dart';
+import 'package:wassalny/main.dart';
 import 'package:wassalny/model/addRatingModel.dart';
 import 'package:wassalny/model/addToCart.dart';
 import 'package:wassalny/model/addToFavourite.dart';
@@ -19,6 +23,10 @@ import 'package:wassalny/model/sentLocation.dart';
 import 'package:wassalny/splash.dart';
 import 'Components/CustomWidgets/myColors.dart';
 import 'Components/Language/getLanguage.dart';
+import 'Screens/Notif/view.dart';
+import 'Screens/Tickets/view.dart';
+import 'Screens/cart/cart.dart';
+import 'Screens/myOrders/myOrders.dart';
 import 'Screens/register/county/list.dart';
 import 'model/aboutandcontact.dart';
 import 'model/branches.dart';
@@ -33,6 +41,8 @@ import 'model/notifications.dart';
 import 'model/offerDetails.dart';
 import 'model/offers.dart';
 import 'model/searchByCity.dart';
+import 'model/searchByCityOffers.dart';
+import 'model/searchoffersLAndLat.dart';
 import 'model/tickets.dart';
 import 'model/ticketsDetailsModel.dart';
 import 'model/ticketsList.dart' as x;
@@ -44,8 +54,6 @@ import 'model/updateCartProvider.dart';
 import 'network/auth/auth.dart';
 
 class WaslnyApp extends StatefulWidget {
-  WaslnyApp({Key key}) : super(key: key);
-
   @override
   _WaslnyAppState createState() => _WaslnyAppState();
 }
@@ -53,14 +61,44 @@ class WaslnyApp extends StatefulWidget {
 class _WaslnyAppState extends State<WaslnyApp> with WidgetsBindingObserver {
   final savedLang = GetStorage();
   final saveToken = GetStorage();
-  // FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  // CustomNotification _notification = CustomNotification();
+  void getMessage() async {
+    RemoteMessage initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+    // if (initialMessage?.data != null) {
+    //   if (initialMessage?.data['type'] == '1') {
+    //     Get.to(() => MyOrdersScreen());
+    //   }
+    //   if (initialMessage?.data['type'] == '2') {
+    //     Get.to(() => Offerss());
+    //   }
+    //   if (initialMessage?.data['type'] == '3') {
+    //     Get.to(() => Tickets());
+    //   }
+    //   if (initialMessage?.data['type'] == '4') {
+    //     Get.to(() => Notififications());
+    //   }
+    // }
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print(message.data['type']);
+      if (message.data['type'] == '1') {
+        Get.to(() => MyOrdersScreen());
+      }
+      if (message.data['type'] == '2') {
+        Get.to(() => Offerss());
+      }
+      if (message.data['type'] == '3') {
+        Get.to(() => Tickets());
+      }
+      if (message.data['type'] == '4') {
+        Get.to(() => Notififications());
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    // _notification.notificationConfig();
-    // _notificationConfig();
+    getMessage();
   }
 
   @override
@@ -84,6 +122,7 @@ class _WaslnyAppState extends State<WaslnyApp> with WidgetsBindingObserver {
             token: auth.token,
           ),
         ),
+
         ChangeNotifierProxyProvider<Auth, HomeLists>(
           create: null,
           update: (context, auth, homelist) => HomeLists(
@@ -164,6 +203,11 @@ class _WaslnyAppState extends State<WaslnyApp> with WidgetsBindingObserver {
           create: null,
           update: (context, auth, searchCity) => SearchCity(token: auth.token),
         ),
+        ChangeNotifierProxyProvider<Auth, SearchOffersByCity>(
+          create: null,
+          update: (context, auth, searchOfferCity) =>
+              SearchOffersByCity(token: auth.token),
+        ),
         ChangeNotifierProxyProvider<Auth, y.SearchStatesProvider>(
           create: null,
           update: (context, auth, searchCity) =>
@@ -183,6 +227,11 @@ class _WaslnyAppState extends State<WaslnyApp> with WidgetsBindingObserver {
           create: null,
           update: (context, auth, searchCity) =>
               SearchLatAndLagProvider(token: auth.token),
+        ),
+        ChangeNotifierProxyProvider<Auth, SearchLatAndLagOffersProvider>(
+          create: null,
+          update: (context, auth, searchCity) =>
+              SearchLatAndLagOffersProvider(token: auth.token),
         ),
         ChangeNotifierProxyProvider<Auth, AllMinProvider>(
           create: null,
@@ -249,7 +298,8 @@ class _WaslnyAppState extends State<WaslnyApp> with WidgetsBindingObserver {
         ),
       ],
       child: GetMaterialApp(
-        translations: Messages(), // your translations
+        translations: Messages(),
+        // your translations
         locale: Locale(savedLang.read('lang') == null
             ? 'ar'
             : savedLang

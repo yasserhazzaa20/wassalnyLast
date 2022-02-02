@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -23,6 +25,7 @@ class CategoryList extends StatefulWidget {
 
 class _CategoryListState extends State<CategoryList> {
   bool loader = false;
+  bool isSorted = false;
   String lang = Get.locale.languageCode;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
@@ -33,49 +36,33 @@ class _CategoryListState extends State<CategoryList> {
     setState(() {
       loader = true;
     });
-    print(widget.id);
     var provider =
         Provider.of<DetailsOfServicesProvider>(context, listen: false);
     provider.allProduct.clear();
-    var nextLength = provider.allProduct.length + 100;
-
-    try {
-      await provider.fetchAllCategories(lang, widget.id, 100, 0, widget.mainID);
-      if (provider.allProduct.length >= nextLength)
-        _refreshController.loadComplete();
-      else
-        _refreshController.loadNoData();
-      setState(() {
-        loader = false;
-      });
-      _refreshController.refreshCompleted();
-      // _refreshController.loadComplete();
-    } catch (error) {
-      _refreshController.refreshCompleted();
-      // _refreshController.loadComplete();
-      print(error);
-      setState(() {
-        loader = false;
-      });
-      throw (error);
-    }
+    var nextLength = provider.allProduct.length;
+    await provider.fetchAllCategories(lang, widget.id, 100, 0, widget.mainID);
+    if (provider.allProduct.length >= nextLength)
+      _refreshController.loadComplete();
+    else
+      _refreshController.loadNoData();
+    setState(() {
+      loader = false;
+    });
+    _refreshController.refreshCompleted();
   }
 
   Future<void> fetchMore(int page) async {
     var provider =
         Provider.of<DetailsOfServicesProvider>(context, listen: false);
-    var nextLength = provider.allProduct.length + 100;
+    var nextLength = provider.allProduct.length;
     try {
       await provider.fetchAllCategories(lang, widget.id, 100, page, 1);
       if (provider.allProduct.length >= nextLength)
         _refreshController.loadComplete();
       else
         _refreshController.loadNoData();
-      // _refreshController.refreshCompleted();
-      // _refreshController.loadComplete();
     } catch (error) {
       _refreshController.refreshCompleted();
-      // _refreshController.loadComplete();
       throw (error);
     }
   }
@@ -111,12 +98,9 @@ class _CategoryListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.id);
     final width = (MediaQuery.of(context).size.width);
-
     final info = Provider.of<DetailsOfServicesProvider>(context, listen: false);
-
-    List<AllProduct> allProduct = info.allProduct;
+    var allProduct = info.allProduct;
     return Scaffold(
       appBar: categoryAppBar(context),
       body: loader
@@ -131,7 +115,7 @@ class _CategoryListState extends State<CategoryList> {
                 });
                 fetchMore(pageNumber);
               },
-              enablePullUp: true,
+              enablePullUp: false,
               controller: _refreshController,
               header: WaterDropHeader(),
               footer: CustomFooter(
@@ -164,12 +148,16 @@ class _CategoryListState extends State<CategoryList> {
                       children: [
                         FlatButton(
                           onPressed: () {
-                            Get.to(
-                              MapPage(
-                                id: widget.id,
-                                searchType: widget.searchType,
-                              ),
-                            );
+                            try {
+                              Get.to(
+                                MapPage(
+                                  id: widget.id,
+                                  searchType: widget.searchType,
+                                ),
+                              );
+                            } catch (e) {
+                              print(e);
+                            }
                           },
                           child: Text('searchBYMAP'.tr),
                           shape: RoundedRectangleBorder(
@@ -179,9 +167,17 @@ class _CategoryListState extends State<CategoryList> {
                             ),
                           ),
                         ),
-                        SizedBox(
-                          width: width * 0.2,
-                        ),
+                        IconButton(
+                            onPressed: () {
+                              isSorted = !isSorted;
+                              isSorted
+                                  ? allProduct.sort((a, b) =>
+                                      a.totalRate.compareTo(b.totalRate))
+                                  : allProduct.sort((a, b) =>
+                                      b.totalRate.compareTo(a.totalRate));
+                              setState(() {});
+                            },
+                            icon: Icon(FontAwesomeIcons.sort)),
                         FlatButton(
                           onPressed: () {
                             Get.to(SetAddress(
@@ -208,14 +204,11 @@ class _CategoryListState extends State<CategoryList> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      child: Image.network(
-                        info.categoryDetail.categoryManbanner,
+                      child: CachedNetworkImage(
+                        imageUrl: info.categoryBanner,
                         fit: BoxFit.fill,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Image.asset(
-                          'assets/images/sema.png',
-                          fit: BoxFit.fill,
-                        ),
+                        placeholder: (context, url) =>
+                            Image.asset('assets/images/logo.png'),
                       ),
                     ),
                   ),
@@ -234,9 +227,7 @@ class _CategoryListState extends State<CategoryList> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              MyText(
-                                  title: info.categoryDetail.categoryName,
-                                  size: 25),
+                              MyText(title: info.categoryName, size: 25),
                             ],
                           ),
                         ),
@@ -245,8 +236,8 @@ class _CategoryListState extends State<CategoryList> {
                               borderRadius: BorderRadius.circular(8),
                               color: Colors.blue.withAlpha(40),
                               image: DecorationImage(
-                                image: NetworkImage(
-                                    info.categoryDetail.categoryImage),
+                                image: CachedNetworkImageProvider(
+                                    info.categoryImage),
                               ),
                             ),
                             height: 70,
@@ -292,7 +283,7 @@ class _CategoryListState extends State<CategoryList> {
                                             color: Colors.white,
                                             image: DecorationImage(
                                               fit: BoxFit.cover,
-                                              image: NetworkImage(
+                                              image: CachedNetworkImageProvider(
                                                   allProduct[index]
                                                       .productImage),
                                             ),

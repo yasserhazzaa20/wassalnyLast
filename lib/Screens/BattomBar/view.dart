@@ -26,7 +26,13 @@ class _BottomNavyViewState extends State<BottomNavyView>
   int isRent = 0;
   int pageIndex = 0;
   bool showFilter = false;
-  List<Widget> pages = [Home(), Offerss(), Filter(1)];
+  List<Widget> pages = [
+    Home(),
+    Offerss(
+      searchType: 1,
+    ),
+    Filter(1)
+  ];
 
   @override
   void didChangeDependencies() {

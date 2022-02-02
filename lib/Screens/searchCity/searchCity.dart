@@ -1,6 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:wassalny/Components/CustomWidgets/showdialog.dart';
 import 'package:wassalny/Screens/service_details/servicesDetails.dart';
+import 'package:wassalny/model/addToFavourite.dart';
 import 'package:wassalny/model/searchByCity.dart';
 
 // package:wasalny/Screens/service_details/servicesDetails.dart
@@ -15,6 +19,28 @@ class SearchCityScreen extends StatefulWidget {
 }
 
 class _SearchCityScreenState extends State<SearchCityScreen> {
+  Future<void> _sentFav(int isFav, int productId) async {
+    bool done =
+        Provider.of<UpdateFavProvider>(context, listen: false).doneSenting;
+
+    try {
+      done = await Provider.of<UpdateFavProvider>(context, listen: false)
+          .updateFav(
+        key: isFav == 0 ? '1' : '2',
+        id: productId,
+      );
+
+      // ignore: unused_catch_clause
+    } catch (error) {
+      print(error);
+      Navigator.of(context).pop();
+      showErrorDaialog('No internet connection', context);
+    }
+    if (done) {
+      // future();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = (MediaQuery.of(context).size.width);
@@ -52,8 +78,8 @@ class _SearchCityScreenState extends State<SearchCityScreen> {
                 scrollDirection: Axis.vertical,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisSpacing: 0,
-                  childAspectRatio: MediaQuery.of(context).size.width * .0025,
                   crossAxisCount: 2,
+                  childAspectRatio: 0.7,
                   mainAxisSpacing: 0,
                 ),
                 itemCount: widget.search.length,
@@ -80,6 +106,37 @@ class _SearchCityScreenState extends State<SearchCityScreen> {
                             ),
                             height: hight * 0.2,
                             width: MediaQuery.of(context).size.width * .3),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  _sentFav(widget.search[index].favExit,
+                                      widget.search[index].prodId);
+                                  setState(() {});
+                                },
+                                icon: widget.search[index].favExit == 0
+                                    ? Icon(
+                                        CupertinoIcons.heart,
+                                        color: Colors.red,
+                                      )
+                                    : Icon(
+                                        CupertinoIcons.heart_fill,
+                                        color: Colors.red,
+                                      )),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Icon(
+                              Icons.star,
+                              color: Colors.yellow,
+                            ),
+                            widget.search[index].totalRate == '' ||
+                                    widget.search[index].totalRate == null
+                                ? Text('0')
+                                : Text(widget.search[index].totalRate),
+                          ],
+                        ),
                         Text(widget.search[index].productName,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,

@@ -85,8 +85,8 @@ class AllOffer {
   String whatsapp;
   String oldPrice;
   String newPrice;
-  DateTime startDate;
-  DateTime endDate;
+  String startDate;
+  String endDate;
   int offerId;
 
   factory AllOffer.fromJson(Map<String, dynamic> json) => AllOffer(
@@ -102,8 +102,8 @@ class AllOffer {
         whatsapp: json["whatsapp"],
         oldPrice: json["old_price"],
         newPrice: json["new_price"],
-        startDate: DateTime.parse(json["start_date"]),
-        endDate: DateTime.parse(json["end_date"]),
+        startDate: json["start_date"],
+        endDate: json["end_date"],
         offerId: json["offer_id"],
       );
 
@@ -120,10 +120,8 @@ class AllOffer {
         "whatsapp": whatsapp,
         "old_price": oldPrice,
         "new_price": newPrice,
-        "start_date":
-            "${startDate.year.toString().padLeft(4, '0')}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}",
-        "end_date":
-            "${endDate.year.toString().padLeft(4, '0')}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}",
+        "start_date": startDate,
+        "end_date": endDate,
         "offer_id": offerId,
       };
 }
@@ -161,7 +159,7 @@ class AllOffersProvider with ChangeNotifier {
   });
 
   List<AllOffer> allOffers = [];
-  List<AllGallery> allGalleries;
+  // List<AllGallery> allGalleries;
 
   // List<SliderOffer> slideOffers=[];
   Future<void> fetchAllOffers(String language) async {
@@ -174,9 +172,10 @@ class AllOffersProvider with ChangeNotifier {
       );
       print(response);
       allOffers = offersFromJson(response.toString()).result.allOffers;
-      for (var i = 0; i < allOffers.length; i++) {
-        allGalleries = allOffers[i].allGalleries;
-      }
+      // for (var i = 0; i < allOffers.length; i++) {
+      //   allGalleries = allOffers[i].allGalleries;
+      //   print(allOffers[i].allGalleries[i].offersImage);
+      // }
       // slideOffers = offersFromJson(response.toString()).result.sliderOffers;
     } catch (err) {
       // ignore: unnecessary_brace_in_string_interps

@@ -1,12 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart' as Dio;
+import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:wassalny/network/auth/dio.dart';
 
-// To parse this JSON data, do
-//
-//     final detailsOfServices = detailsOfServicesFromJson(jsonString);
+import 'home.dart';
 
 DetailsOfServices detailsOfServicesFromJson(String str) =>
     DetailsOfServices.fromJson(json.decode(str));
@@ -64,7 +63,8 @@ class Result {
 
   Map<String, dynamic> toJson() => {
         "category_details": categoryDetails.toJson(),
-        "all_products": List<dynamic>.from(allProducts.map((x) => x.toJson())),
+        "all_products":
+            List.from(allProducts.map((x) => x.toJson())),
       };
 }
 
@@ -137,17 +137,28 @@ class CategoryDetails {
       };
 }
 
+class CachedServices{
+  String catId;
+  CategoryDetails categoryDetails;
+
+  CachedServices({this.catId, this.categoryDetails});
+}
+
 class DetailsOfServicesProvider with ChangeNotifier {
   String token;
+  int departmentId;
 
   DetailsOfServicesProvider({
     this.token,
   });
-
+  GetStorage storage = GetStorage();
   CategoryDetails categoryDetail;
+  String categoryImage;
+  String categoryName;
+  String categoryBanner;
   List<AllProduct> allProduct = [];
-  String name;
-  String imag;
+  String productName;
+  String productImage;
   int id;
   int total;
   Future<void> fetchAllCategories(
@@ -178,15 +189,68 @@ class DetailsOfServicesProvider with ChangeNotifier {
           },
         ),
       );
-      print(response);
-      allProduct =
-          detailsOfServicesFromJson(response.toString()).result.allProducts;
+        response.data['result']['all_products'].forEach((product){
+          allProduct.add(AllProduct.fromJson(product));
+        });
+        print(allProduct[0].productName);
 
+      categoryImage =
+          response.data['result']["category_details"]["category_image"];
+      categoryBanner =
+          response.data['result']["category_details"]["category_manbanner"];
+      categoryName =
+          response.data['result']["category_details"]["category_name"];
       categoryDetail =
-          detailsOfServicesFromJson(response.toString()).result.categoryDetails;
+          CategoryDetails.fromJson(response.data['result']["category_details"]);
+
+      // storage.write("allServices", null);
+    if(storage.read("allServices")==null){
+        Result result = Result.fromJson(response.data['result']);
+        storage.write("allServices", [result.toJson()]);
+      }else{
+      int hasId = 0;
+        List cachedServices = storage.read("allServices");
+        cachedServices.forEach((element) {
+          if(categoryDetail.catId.toString()==element['category_details']['cat_id'].toString()){
+            hasId=1;
+          }
+        });
+        if(hasId==0){
+          cachedServices.add(Result(categoryDetails: categoryDetail,allProducts: allProduct).toJson());
+          storage.write("allServices", cachedServices);
+        }
+
+      print("kjbjkhbj  ${cachedServices.length}");
+
+      // print("iiiiii ${cachedServices.length}");
+      }
       total = response.data['total'];
     } catch (err) {
-      throw (err);
+      categoryDetail=null;
+      if(storage.read("allServices")!=null) {
+        List allServices = storage.read("allServices");
+        print("biuygyu ${allServices}");
+        allServices.forEach((element) {
+          print("biuygyu ${element}");
+          if (id == element['category_details']['cat_id']) {
+            element['all_products'].forEach((e){
+              allProduct.add(AllProduct.fromJson(e));
+            });
+            categoryDetail = CategoryDetails.fromJson(element['category_details']);
+          }
+        });
+
+        if(categoryDetail!=null) {
+          categoryImage = categoryDetail.categoryImage;
+          categoryBanner = categoryDetail.categoryManbanner;
+          categoryName = categoryDetail.categoryName;
+          print("${allProduct.length} " + "numberrrr");
+        }else{
+          categoryImage = "";
+          categoryBanner = "";
+          categoryName = "";
+        }
+      }
     }
   }
 }

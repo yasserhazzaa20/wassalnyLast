@@ -68,12 +68,16 @@ class AllProduct {
     this.productImage,
     this.productName,
     this.phone,
+    this.favExit,
+    this.totalRate,
     this.prodId,
     this.delivery,
   });
 
   String productImage;
   String productName;
+  int favExit;
+  String totalRate;
   String phone;
   int prodId;
   int delivery;
@@ -83,6 +87,8 @@ class AllProduct {
         productName: json["product_name"],
         phone: json["phone"],
         prodId: json["prod_id"],
+        favExit: json["fav_exit"],
+        totalRate: json["total_rate"],
         delivery: json["delivery"],
       );
 
@@ -90,6 +96,8 @@ class AllProduct {
         "product_image": productImage,
         "product_name": productName,
         "phone": phone,
+        "fav_exit": favExit,
+        "total_rate": totalRate,
         "prod_id": prodId,
         "delivery": delivery,
       };
@@ -101,8 +109,14 @@ class SearchLatAndLagProvider with ChangeNotifier {
 
   List<AllProduct> searchLatAndLag = [];
   bool doneSearching = false;
-  Future<bool> fetchSearch(int catId, int limt, int pageNumber, double lat,
-      double lag, int searchType, String lang) async {
+  Future<bool> fetchSearch(
+      {int catId,
+      int limt,
+      int pageNumber,
+      double lat,
+      double lag,
+      int searchType,
+      String lang}) async {
     print(lat);
     print(lag);
     print(catId);
@@ -120,6 +134,54 @@ class SearchLatAndLagProvider with ChangeNotifier {
             'cat_id': catId,
             'lat': lat,
             'lag': lag,
+            "dep_type": searchType,
+            "lang": lang
+          },
+        ),
+      );
+      print(response);
+      if (response.data['status'] == true) {
+        searchLatAndLag =
+            searchLagAndlatFromJson(response.toString()).result.allProducts;
+        doneSearching = true;
+      }
+      return doneSearching;
+    } catch (err) {
+      // ignore: unnecessary_brace_in_string_interps
+      print('${err} error from searchLat list');
+      throw (err);
+    }
+  }
+
+  Future<bool> fetchFilerSearch(
+      {int catId,
+      int limt,
+      int pageNumber,
+      double lat,
+      double lag,
+      int searchType,
+      int city,
+      int state,
+      String lang}) async {
+    print(lat);
+    print(lag);
+    print(catId);
+    print(searchType);
+
+    try {
+      Dio.Response response = await dio().post(
+        'user_api/get_search_lat_lag_filter',
+        data: Dio.FormData.fromMap(
+          {
+            'key': 1234567890,
+            'token_id': token,
+            'limit': limt,
+            'page_number': pageNumber,
+            'cat_id': catId,
+            'lat': lat,
+            'lag': lag,
+            "city": city,
+            "state": state,
             "dep_type": searchType,
             "lang": lang
           },

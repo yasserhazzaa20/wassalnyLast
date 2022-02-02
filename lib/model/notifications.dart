@@ -69,6 +69,7 @@ class AllNotification {
     this.id,
     this.body,
     this.isRead,
+    this.type,
     this.createdAt,
     this.img,
   });
@@ -76,6 +77,7 @@ class AllNotification {
   String title;
   int id;
   String body;
+  int type;
   int isRead;
   DateTime createdAt;
   String img;
@@ -86,6 +88,7 @@ class AllNotification {
         id: json["id"],
         body: json["body"],
         isRead: json["is_read"],
+        type: json["type"],
         createdAt: DateTime.parse(json["created_at"]),
         img: json["img"],
       );
@@ -95,6 +98,7 @@ class AllNotification {
         "id": id,
         "body": body,
         "is_read": isRead,
+        "type": type,
         "created_at":
             "${createdAt.year.toString().padLeft(4, '0')}-${createdAt.month.toString().padLeft(2, '0')}-${createdAt.day.toString().padLeft(2, '0')}",
         "img": img,

@@ -40,10 +40,10 @@ class _MinState extends State<Min> {
     try {
       await Provider.of<AddProductProvider>(context, listen: false)
           .addToCart(id);
-
       Get.snackbar(
         'تم الاضافه',
-        'تم الاضافه الي العربه بنجاح',
+        'تم الاضافه الي السلة بنجاح',
+        isDismissible: true,
         titleText: Text(
           'تم الاضافه ',
           textDirection: lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,
@@ -54,7 +54,7 @@ class _MinState extends State<Min> {
           ),
         ),
         messageText: Text(
-          'تم الاضافه الي العربه بنجاح',
+          'تم الاضافه الي السلة بنجاح',
           textDirection: lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,
           style: TextStyle(
             color: Colors.black,
@@ -69,6 +69,7 @@ class _MinState extends State<Min> {
       Get.snackbar(
         'لم تتم الاضافه',
         'تحقق من الاتصال بالانترت',
+        isDismissible: true,
         titleText: Text(
           'لم تتم الاضافه',
           textDirection: lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,

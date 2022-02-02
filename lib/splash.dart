@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:dio/dio.dart' as Dio;
+import 'package:wassalny/Screens/register/register.dart';
 
 import 'Screens/BattomBar/view.dart';
 import 'Screens/login/view.dart';
@@ -53,7 +54,7 @@ class SplashScreenState extends State<SplashScreen> {
         });
       } else {
         Future.delayed(Duration(seconds: 1), () {
-          Get.offAll(Login());
+          Get.offAll(Register());
         });
       }
     });

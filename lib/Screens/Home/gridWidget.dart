@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -5,7 +6,7 @@ import 'package:wassalny/Screens/CategoryList/view.dart';
 import 'package:wassalny/Screens/Subsections/view.dart';
 import 'package:wassalny/model/home.dart';
 
-Widget customGridView(BuildContext context, List<AllCategory> items) {
+Widget customGridView(BuildContext context, List<AllCategories> items) {
   return GridView.builder(
     shrinkWrap: true,
     physics: NeverScrollableScrollPhysics(),
@@ -44,9 +45,10 @@ Widget customGridView(BuildContext context, List<AllCategory> items) {
               width: 100,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: FadeInImage.assetNetwork(
-                  placeholder: 'assets/images/logo.png',
-                  image: items[index].categoryImage,
+                child: CachedNetworkImage(
+                  placeholder: (context, url) =>
+                      Image.asset('assets/images/logo.png'),
+                  imageUrl: items[index].categoryImage,
                   fit: BoxFit.fill,
                   fadeInDuration: Duration(seconds: 2),
                 ),

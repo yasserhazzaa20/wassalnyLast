@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -8,9 +9,13 @@ class CustomTextField extends StatefulWidget {
   final TextDirection textDirection;
   final Function onTap;
   final Widget icon;
+  List<TextInputFormatter> inputFormatters;
   final Function onChanged;
   final Function(String) onSaved;
   final String Function(String) valid;
+  final IconData suffixIcon;
+  final bool isPassword;
+  final Function suffixPress;
   CustomTextField(
       {this.focusNode,
       this.valid,
@@ -21,7 +26,11 @@ class CustomTextField extends StatefulWidget {
       this.textDirection,
       this.onTap,
       this.icon,
-      this.onChanged});
+      this.onChanged,
+      this.suffixIcon,
+      this.isPassword = false,
+      this.suffixPress,
+      this.inputFormatters});
 
   @override
   _CustomTextFieldState createState() => _CustomTextFieldState();
@@ -45,7 +54,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
           focusNode: widget.focusNode,
           controller: widget.controller,
           keyboardType: widget.type,
-          obscureText: false,
+          inputFormatters: widget.inputFormatters,
+          obscureText: widget.isPassword,
           textDirection: (widget.textDirection == null &&
                       currentLanguage.languageCode == "ar") ||
                   widget.textDirection == TextDirection.rtl
@@ -55,20 +65,25 @@ class _CustomTextFieldState extends State<CustomTextField> {
           style: TextStyle(
               fontSize: 17, fontFamily: 'GE-Snd-Book', color: Colors.black),
           decoration: InputDecoration(
-              filled: true,
-              focusColor: Colors.transparent,
-              fillColor: Colors.transparent,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              hintText: widget.hint,
-              hintStyle: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
-                  color: Colors.red,
-                  fontFamily: 'GE-Snd-Book'),
-              icon: widget.icon == null ? null : widget.icon,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0))),
+            filled: true,
+            focusColor: Colors.transparent,
+            fillColor: Colors.transparent,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            hintText: widget.hint,
+            hintStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+                color: Colors.red,
+                fontFamily: 'GE-Snd-Book'),
+            // icon: widget.icon == null ? null : widget.icon,
+            suffixIcon: widget.suffixIcon != null
+                ? InkWell(
+                    onTap: widget.suffixPress, child: Icon(widget.suffixIcon))
+                : null,
+            // contentPadding:
+            //     EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0)
+          )),
     );
   }
 }

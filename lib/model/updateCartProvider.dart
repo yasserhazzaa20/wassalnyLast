@@ -7,7 +7,7 @@ class UpdateIndexOfCartProvider with ChangeNotifier {
   UpdateIndexOfCartProvider({this.token});
 
   Future<void> updateIndex(
-      String lang, int idKey, int idOrder, int quantity) async {
+      {String lang, int idKey, int idOrder, int quantity}) async {
     Map<String, dynamic> map = {
       'key': 1234567890,
       'token_id': token,

@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,17 +18,21 @@ import 'package:wassalny/Screens/cart/cart.dart';
 import 'package:wassalny/Screens/login/view.dart';
 import 'package:wassalny/Screens/myFavourite/myFavouriteScreen.dart';
 import 'package:wassalny/Screens/myOrders/myOrders.dart';
+import 'package:wassalny/model/categoriseDetails.dart';
 
 import 'dart:io' show Platform;
 
 import 'package:wassalny/model/home.dart';
 import 'package:wassalny/network/auth/auth.dart';
 
+import '../al_points_screen.dart';
+
 class MyDrawer extends StatefulWidget {
   final String name;
   final userData;
+  final products;
 
-  MyDrawer({this.name, this.userData});
+  MyDrawer({this.name, this.userData, this.products});
 
   @override
   State<StatefulWidget> createState() {
@@ -45,9 +50,10 @@ class _MyDrawer extends State<MyDrawer> {
   String url;
   String chevk() {
     if (Platform.isAndroid) {
-      url = 'https://play.google.com/store';
+      url = 'https://play.google.com/store/apps/details?id=com.waselnni';
     } else if (Platform.isIOS) {
-      url = 'https://www.apple.com/eg-ar/app-store/';
+      url =
+          'https://apps.apple.com/eg/app/%D9%88%D8%B5%D9%84%D9%86%D9%8A/id1578474355';
     }
     return url;
   }
@@ -68,7 +74,7 @@ class _MyDrawer extends State<MyDrawer> {
     }
   }
 
-  Widget menuTitle(String title, Function onTap) {
+  Widget menuTitle(String title, Function onTap, {bool cart = false}) {
     return Container(
       margin: EdgeInsets.only(right: 10.0, left: 10.0, bottom: 10.0, top: 0),
       padding: EdgeInsets.only(right: 0.0, left: 0.0, bottom: 10.0, top: 10),
@@ -85,6 +91,16 @@ class _MyDrawer extends State<MyDrawer> {
                   color: Colors.white,
                   weight: FontWeight.w600,
                   size: 15),
+              if (cart)
+                Badge(
+                  badgeContent: Text(
+                    widget.products.length.toString(),
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  child: Icon(Icons.shopping_cart_outlined, color: Colors.blue),
+                )
             ],
           ),
         ),
@@ -140,14 +156,19 @@ class _MyDrawer extends State<MyDrawer> {
               menuTitle("Favourite".tr, () {
                 Get.to(MyFavouriteScreen());
               }),
-              menuTitle("cart".tr, () {
-                Get.to(CartScreen());
-              }),
+              menuTitle(
+                "cart".tr,
+                () {
+                  Get.to(CartScreen());
+                },
+              ),
               menuTitle("MyOrders".tr, () {
                 Get.to(MyOrdersScreen());
               }),
               menuTitle("offers".tr, () {
-                Get.to(Offerss());
+                Get.to(Offerss(
+                  searchType: 0,
+                ));
               }),
               menuTitle("lang".tr, () {
                 Get.to(Language());
@@ -163,6 +184,9 @@ class _MyDrawer extends State<MyDrawer> {
               }),
               menuTitle("aboutApp".tr, () {
                 Get.to(About());
+              }),
+              menuTitle("points".tr, () {
+                Get.to(AllPointsScreen());
               }),
               menuTitle(
                 "ContactUs".tr,

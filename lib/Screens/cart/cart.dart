@@ -40,19 +40,21 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
-  Future<void> _updateIndex(
+  Future<void> _updateIndex({
     int productId,
     int quan,
     int id,
-  ) async {
+  }) async {
     // bool auth =
     //     Provider.of<UpdateIndexOfCartProvider>(context, listen: false).deleted;
     try {
       await Provider.of<UpdateIndexOfCartProvider>(context, listen: false)
-          .updateIndex(lang, productId, id, quan);
+          .updateIndex(
+              lang: lang, idKey: productId, idOrder: id, quantity: quan);
 
       // ignore: unused_catch_clause
-    } on HttpExeption catch (error) {} catch (error) {
+    } on HttpExeption catch (error) {
+    } catch (error) {
       print(error);
     }
   }
@@ -156,35 +158,42 @@ class _CartScreenState extends State<CartScreen> {
           color: Colors.white,
         ),
         centerTitle: true,
-        title: Row(
-          children: [
-            SizedBox(
-              width: width * 0.24,
+        actions: [
+          SizedBox(
+            width: width * 0.3,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
             ),
-            Text(
-              "cart".tr,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-              ),
-            ),
-            SizedBox(
-              width: width * 0.3,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(7.0),
+            child: Padding(
+              padding: const EdgeInsets.all(7),
+              child: Center(
                 child: Text(
                   allProducts.length.toString(),
                   style: TextStyle(color: Colors.blue, height: 1.8),
                 ),
               ),
             ),
-          ],
+          ),
+          IconButton(
+            onPressed: () async {
+              await Provider.of<CartListProvider>(context, listen: false)
+                  .emptyCart(lang, allProducts[0].idOrder);
+              future();
+            },
+            icon: Icon(
+              Icons.delete,
+            ),
+          ),
+        ],
+        title: Text(
+          "cart".tr,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+          ),
         ),
       ),
       body: Container(
@@ -283,6 +292,24 @@ class _CartScreenState extends State<CartScreen> {
                                                   ),
                                                 ),
                                               ),
+                                              Align(
+                                                alignment: Alignment.topCenter,
+                                                child: Container(
+                                                  width: width * 0.5,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            right: 5),
+                                                    child: Text(
+                                                      allProducts[index]
+                                                          .serviceName,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 6,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
                                               SizedBox(
                                                 height: hieght * 0.013,
                                               ),
@@ -293,12 +320,10 @@ class _CartScreenState extends State<CartScreen> {
                                                       MainAxisAlignment.center,
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.center,
-                                                  textBaseline:
-                                                      TextBaseline.alphabetic,
                                                   children: [
                                                     IconButton(
                                                       icon: Icon(
-                                                        Icons.arrow_left,
+                                                        Icons.remove,
                                                         color: Colors.black,
                                                         size: 30,
                                                       ),
@@ -314,13 +339,9 @@ class _CartScreenState extends State<CartScreen> {
                                                                     .quantity--;
                                                               });
                                                               _updateIndex(
-                                                                  allProducts[
-                                                                          index]
-                                                                      .idProduct,
-                                                                  allProducts[
-                                                                          index]
-                                                                      .quantity,
-                                                                  allProducts[
+                                                                  productId: 2,
+                                                                  quan: 1,
+                                                                  id: allProducts[
                                                                           index]
                                                                       .idOrder);
                                                             },
@@ -335,7 +356,7 @@ class _CartScreenState extends State<CartScreen> {
                                                     ),
                                                     IconButton(
                                                         icon: Icon(
-                                                          Icons.arrow_right,
+                                                          Icons.add,
                                                           color: Colors.black,
                                                           size: 30,
                                                         ),
@@ -345,12 +366,22 @@ class _CartScreenState extends State<CartScreen> {
                                                                 .quantity++;
                                                           });
                                                           _updateIndex(
-                                                              allProducts[index]
-                                                                  .idProduct,
-                                                              allProducts[index]
-                                                                  .quantity,
-                                                              allProducts[index]
+                                                              productId: 1,
+                                                              quan: 1,
+                                                              id: allProducts[
+                                                                      index]
                                                                   .idOrder);
+                                                        }),
+                                                    IconButton(
+                                                        icon: Icon(
+                                                          Icons.delete,
+                                                          color: Colors.black,
+                                                          size: 30,
+                                                        ),
+                                                        onPressed: () {
+                                                          remove(
+                                                              allProducts[index]
+                                                                  .idProduct);
                                                         }),
                                                   ],
                                                 ),

@@ -88,7 +88,7 @@ class ListCountry {
 }
 
 class CityDropDownProvider with ChangeNotifier {
-  List<ListCountry> list = [];
+  List<ListCountry> list;
   Future<void> fetchAllCites(String lang) async {
     try {
       Dio.Response response = await dio().post(
@@ -99,6 +99,7 @@ class CityDropDownProvider with ChangeNotifier {
       );
       print(response.data);
       list = cityDropDwonFromJson(response.toString()).result.listCountries;
+      print(list[0].nameCountry);
     } catch (err) {
       // ignore: unnecessary_brace_in_string_interps
       print('${err}');

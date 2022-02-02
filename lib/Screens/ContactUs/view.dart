@@ -103,15 +103,14 @@ class _ContactUsState extends State<ContactUs> {
                           ? Text('')
                           : InkWell(
                               onTap: () async {
-                                await launch('mailto:${info.gmailEmail}');
+                                await launch('mailto:${info.supportEmail}');
                               },
                               child: Text(info.supportEmail,
                                   style: TextStyle(fontSize: 22)),
                             ),
                       info.address == null
                           ? Text('')
-                          : Text(info.supportEmail,
-                              style: TextStyle(fontSize: 22)),
+                          : Text(info.address, style: TextStyle(fontSize: 22)),
                       SizedBox(
                         height: 30,
                       ),

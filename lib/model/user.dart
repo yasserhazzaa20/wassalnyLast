@@ -4,9 +4,16 @@ class User {
   //{============To Sent Login============}
   String phone;
   num key = 1234567890;
+  String oldPassword;
+
   final saveToken = GetStorage();
   Map<String, dynamic> sentPhoneToLogin(String fireBaseToken) {
-    return {'phone': phone, 'key': 1234567890, 'firebase_id': fireBaseToken};
+    return {
+      'phone': phone,
+      'key': 1234567890,
+      'firebase_id': fireBaseToken,
+      "password": oldPassword
+    };
   }
 
   //{============To Sent Edait Profile============}
@@ -69,6 +76,8 @@ class User {
   String newphone;
   String newAdress;
 
+  String password;
+
   Map<String, dynamic> sentRegister(
       String token, String lang, String country, String fireBaseToken) {
     return {
@@ -78,7 +87,8 @@ class User {
       'phone': newphone,
       'address': newAdress,
       'firebase_id': fireBaseToken,
-      'Country': country
+      'Country': country,
+      "password": password
     };
   }
 }

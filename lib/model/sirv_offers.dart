@@ -7,6 +7,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart' as Dio;
 import 'package:wassalny/network/auth/dio.dart';
 
+// To parse this JSON data, do
+//
+//     final sirvOffers = sirvOffersFromJson(jsonString);
+
+import 'dart:convert';
+
 SirvOffers sirvOffersFromJson(String str) =>
     SirvOffers.fromJson(json.decode(str));
 
@@ -65,6 +71,7 @@ class Result {
 
 class AllOffer {
   AllOffer({
+    this.allGalleries,
     this.offerImage,
     this.offerName,
     this.description,
@@ -77,6 +84,7 @@ class AllOffer {
     this.offerId,
   });
 
+  List<AllGallery> allGalleries;
   String offerImage;
   String offerName;
   String description;
@@ -89,6 +97,8 @@ class AllOffer {
   int offerId;
 
   factory AllOffer.fromJson(Map<String, dynamic> json) => AllOffer(
+        allGalleries: List<AllGallery>.from(
+            json["all_galleries"].map((x) => AllGallery.fromJson(x))),
         offerImage: json["offer_image"],
         offerName: json["offer_name"],
         description: json["description"],
@@ -102,6 +112,8 @@ class AllOffer {
       );
 
   Map<String, dynamic> toJson() => {
+        "all_galleries":
+            List<dynamic>.from(allGalleries.map((x) => x.toJson())),
         "offer_image": offerImage,
         "offer_name": offerName,
         "description": description,
@@ -112,6 +124,26 @@ class AllOffer {
         "start_date": startDate,
         "end_date": endDate,
         "offer_id": offerId,
+      };
+}
+
+class AllGallery {
+  AllGallery({
+    this.offersId,
+    this.offersImage,
+  });
+
+  String offersId;
+  String offersImage;
+
+  factory AllGallery.fromJson(Map<String, dynamic> json) => AllGallery(
+        offersId: json["offers_id"],
+        offersImage: json["offers_image"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "offers_id": offersId,
+        "offers_image": offersImage,
       };
 }
 

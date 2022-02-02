@@ -1,3 +1,4 @@
+// import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart' as Dio;
 import 'package:fcm_config/fcm_config.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,7 @@ import 'package:wassalny/model/registerModel.dart';
 import 'package:wassalny/model/user.dart';
 import 'package:wassalny/model/userdata.dart';
 
+import '../../notification_helper.dart';
 import './dio.dart';
 
 class Auth with ChangeNotifier {
@@ -40,6 +42,7 @@ class Auth with ChangeNotifier {
       );
       print(response);
       if (response.data['status'] == false) {
+        loggedIn = false;
         throw HttpExeption('error');
       }
       if (response.data['status'] == true) {
@@ -224,6 +227,60 @@ class Auth with ChangeNotifier {
       }
       notifyListeners();
       return doneLogOut;
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  bool sendCode = false;
+  Future<bool> forgetPassword(String phoneNumber) async {
+    try {
+      Dio.Response response = await dio().post(
+        '/user_api/forget_password',
+        data: Dio.FormData.fromMap(
+          {"phone": phoneNumber, 'key': 1234567890},
+        ),
+      );
+      print(response);
+      if (response.data['status'] == true) {
+        final preferences = await SharedPreferences.getInstance();
+        sendCode = true;
+        NotificationHelper().initializeNotification();
+        NotificationHelper().requestIOSPermissions();
+        NotificationHelper()
+            .displayNotification(title: "Code", body: response.data["result"])
+            .then((value) async {
+          await preferences.setString('code', response.data['result']);
+        });
+      }
+      notifyListeners();
+      return sendCode;
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  bool editPassword = false;
+  Future<bool> changePassword(
+      {String phoneNumber, String password, String confirmPassword}) async {
+    try {
+      Dio.Response response = await dio().post(
+        '/user_api/change_password',
+        data: Dio.FormData.fromMap(
+          {
+            "phone": phoneNumber,
+            'key': 1234567890,
+            "password": password,
+            "confirmpassword": confirmPassword,
+          },
+        ),
+      );
+      print(response);
+      if (response.data['status'] == true) {
+        editPassword = true;
+      }
+      notifyListeners();
+      return sendCode;
     } catch (e) {
       throw (e);
     }

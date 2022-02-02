@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wassalny/Screens/CategoryList/view.dart';
@@ -44,13 +45,11 @@ class _SubsectionsState extends State<Subsections> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: Image.network(
-                  widget.banner,
+                child: CachedNetworkImage(
+                  imageUrl: widget.banner,
                   fit: BoxFit.fill,
-                  errorBuilder: (context, error, stackTrace) => Image.asset(
-                    'assets/images/sema.png',
-                    fit: BoxFit.fill,
-                  ),
+                  placeholder: (context, url) =>
+                      Image.asset('assets/images/logo.png'),
                 ),
               ),
             ),
@@ -89,9 +88,10 @@ class _SubsectionsState extends State<Subsections> {
                           width: 100,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(15),
-                            child: FadeInImage.assetNetwork(
-                              placeholder: 'assets/images/logo.png',
-                              image: widget.items[index].departmentImage,
+                            child: CachedNetworkImage(
+                              placeholder: (context, url) =>
+                                  Image.asset('assets/images/logo.png'),
+                              imageUrl: widget.items[index].departmentImage,
                               fit: BoxFit.fill,
                               fadeInDuration: Duration(seconds: 2),
                             ),

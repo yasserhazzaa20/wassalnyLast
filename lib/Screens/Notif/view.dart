@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:wassalny/Components/CustomWidgets/appBar.dart';
+import 'package:wassalny/Screens/Offerss/view.dart';
+import 'package:wassalny/Screens/Tickets/view.dart';
+import 'package:wassalny/Screens/myOrders/myOrders.dart';
 import 'package:wassalny/model/notifications.dart';
 
 import 'notificationDetails.dart';
@@ -117,11 +120,20 @@ class _NotifificationsState extends State<Notififications> {
                       shrinkWrap: true,
                       itemCount: notifications.length,
                       itemBuilder: (context, index) {
-                        return GestureDetector(
+                        return InkWell(
                           onTap: () {
-                            Get.to(NotificationsDetails(
-                              id: notifications[index].id,
-                            ));
+                            if (notifications[index].type == 1) {
+                              return Get.to(MyOrdersScreen());
+                            }
+                            if (notifications[index].type == 2) {
+                              return Get.to(Offerss());
+                            }
+                            if (notifications[index].type == 3) {
+                              return Get.to(Tickets());
+                            }
+                            if (notifications[index].type == 4) {
+                              return Get.to(Notififications());
+                            }
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(
@@ -135,10 +147,23 @@ class _NotifificationsState extends State<Notififications> {
                             ),
                             child: Column(
                               children: [
+                                Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.8,
+                                    height:
+                                        MediaQuery.of(context).size.width * 0.4,
+                                    child: Image.network(
+                                      notifications[index].img,
+                                      fit: BoxFit.cover,
+                                    )),
+                                SizedBox(height: 10),
                                 Row(
                                   children: [
                                     Text(
-                                      notifications[index].createdAt.toString(),
+                                      notifications[index]
+                                          .createdAt
+                                          .toString()
+                                          .substring(0, 10),
                                       style: TextStyle(color: Colors.grey),
                                     ),
                                     Spacer(),
@@ -155,16 +180,46 @@ class _NotifificationsState extends State<Notififications> {
                                   ],
                                 ),
                                 SizedBox(height: 10),
+                                Align(
+                                  alignment: Alignment.topRight,
+                                  child: Text(notifications[index].title,
+                                      style: TextStyle(
+                                          fontSize: 21,
+                                          fontWeight: FontWeight.bold),
+                                      textAlign: TextAlign.start),
+                                ),
                                 Row(
                                   children: [
                                     Expanded(
                                         child: Text(notifications[index].body,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                                 fontSize: 21,
                                                 fontWeight: FontWeight.w500),
                                             textAlign: TextAlign.center))
                                   ],
                                 ),
+                                InkWell(
+                                  onTap: () {
+                                    Get.to(NotificationsDetails(
+                                      id: notifications[index].id,
+                                    ));
+                                  },
+                                  child: Align(
+                                    alignment: Alignment.bottomLeft,
+                                    child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Icon(
+                                        Icons.arrow_forward_ios,
+                                      ),
+                                    ),
+                                  ),
+                                )
                               ],
                             ),
                           ),

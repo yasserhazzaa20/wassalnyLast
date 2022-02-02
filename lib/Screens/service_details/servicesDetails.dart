@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -10,11 +12,12 @@ import 'package:carousel_pro/carousel_pro.dart';
 import 'package:wassalny/Components/CustomWidgets/customTextField.dart';
 import 'package:wassalny/Components/CustomWidgets/showdialog.dart';
 import 'package:wassalny/Screens/Branches/view.dart';
-import 'package:wassalny/Screens/Home/drawer.dart';
+import 'package:wassalny/Screens/cart/order_cart.dart';
 import 'package:wassalny/Screens/min/view.dart';
 import 'package:wassalny/Screens/service_details/services_offer.dart';
 import 'package:wassalny/model/addRatingModel.dart';
 import 'package:wassalny/model/addToFavourite.dart';
+import 'package:wassalny/model/cartProvider.dart';
 import 'package:wassalny/model/itemServicesDetail.dart';
 import 'package:wassalny/model/sentLocation.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -37,14 +40,11 @@ class _ServicesDetailsState extends State<ServicesDetails> {
   ScrollController _customController = ScrollController();
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
-  String counterr, value = '';
-  Future counter() async {
+  String counterr;
+  Future<String> counter() async {
     counterr = await FlutterBarcodeScanner.scanBarcode(
-        '#004297', 'colse', true, ScanMode.DEFAULT);
-    setState(() {
-      value = counterr;
-    });
-    return value;
+        '#004297', 'close', true, ScanMode.DEFAULT);
+    return counterr;
   }
 
   Widget imageCarousel() {
@@ -73,8 +73,8 @@ class _ServicesDetailsState extends State<ServicesDetails> {
               boxFit: BoxFit.fill,
               images: sliderImageInMain.map(
                 (e) {
-                  return Image.network(
-                    e.img,
+                  return CachedNetworkImage(
+                    imageUrl: e.img,
                     fit: BoxFit.fill,
                   );
                 },
@@ -91,10 +91,12 @@ class _ServicesDetailsState extends State<ServicesDetails> {
   }
 
   String lang = Get.locale.languageCode;
+  bool isCache = false;
 
   Future<void> getDetails() async {
     setState(() {
       loader = true;
+      isCache = true;
     });
     Provider.of<ItemServicesDetail>(context, listen: false).cobon = 0;
     try {
@@ -103,8 +105,14 @@ class _ServicesDetailsState extends State<ServicesDetails> {
 
       setState(() {
         loader = false;
+        isCache = true;
       });
-    } catch (e) {}
+    } catch (e) {
+      setState(() {
+        loader = false;
+        isCache = false;
+      });
+    }
   }
 
   Future<void> getFav() async {
@@ -113,7 +121,11 @@ class _ServicesDetailsState extends State<ServicesDetails> {
     try {
       await Provider.of<ItemServicesDetail>(context, listen: false)
           .fetchAllDetails(widget.id, lang);
-    } catch (e) {}
+    } catch (e) {
+      setState(() {
+        loader = false;
+      });
+    }
   }
 
   bool cobonLoader = false;
@@ -125,34 +137,26 @@ class _ServicesDetailsState extends State<ServicesDetails> {
     try {
       await Provider.of<ItemServicesDetail>(context, listen: false)
           .getCobon(widget.id);
-
       setState(() {
         cobonLoader = false;
       });
     } catch (e) {}
   }
 
-  bool qrloader = false;
-  Future<void> getQr(qr) async {
-    setState(() {
-      loader = true;
-    });
+  Future<void> getQr(int qr,var qrId) async {
     try {
       await Provider.of<ItemServicesDetail>(context, listen: false)
-          .qr(qr, lang);
-
-      setState(() {
-        loader = false;
-      });
+          .qr(qr, qrId,lang);
       final provider = Provider.of<ItemServicesDetail>(context, listen: false);
-
-      qrDaialog(provider.number.toString(), context, provider.message);
-    } catch (e) {}
+      qrDaialog(provider.number == 0 ?"" :provider.number.toString(), context, provider.message);
+    } catch (e) {
+     print(e.toString());
+    }
   }
 
   Widget cobonNum() {
     final info = Provider.of<ItemServicesDetail>(context, listen: false);
-    if (info.cobon.toString() == '') {
+    if (info.cobon == 0) {
       setState(() {});
       return AutoSizeText(
         'nodiscountcoupons'.tr,
@@ -218,7 +222,6 @@ class _ServicesDetailsState extends State<ServicesDetails> {
     bool done = Provider.of<SentLocationgProvider>(context, listen: false)
         .doneSentLocation;
     print(lat);
-
     try {
       done = await Provider.of<SentLocationgProvider>(context, listen: false)
           .sentLocationgProvider(
@@ -320,31 +323,6 @@ class _ServicesDetailsState extends State<ServicesDetails> {
         ),
       )..addListener(() {});
     });
-
-    // .then((value) {
-    //   marker.add(
-    //     Marker(
-    //       markerId: MarkerId('MyMarker'),
-    //       draggable: false,
-    //       position: LatLng(
-    //         double.parse(
-    //             Provider.of<ItemServicesDetail>(context, listen: false).lat),
-    //         double.parse(
-    //             Provider.of<ItemServicesDetail>(context, listen: false).lag),
-    //       ),
-    //     ),
-    //   );
-    // });
-
-    // _videoPlayerController = VideoPlayerController.network(
-    //      'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4')
-    //   ..setVolume(1.0)
-    //   ..setLooping(true)
-    //   ..initialize().then((value) {
-    //     setState(() {
-    //       _videoPlayerController.play();
-    //     });
-
     super.initState();
   }
 
@@ -368,11 +346,19 @@ class _ServicesDetailsState extends State<ServicesDetails> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: Row(
+            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
                 width: width * 0.25,
               ),
+              // SizedBox(
+              //   width: 5,
+              // ),
+              // IconButton(onPressed: (){
+              //   Navigator.pop(context);
+              // }, icon: Icon(Icons.arrow_back_ios)),
               Image.asset('assets/images/logo.png', width: 50),
+              // SizedBox(width: 20,),
               Spacer(),
               IconButton(
                   onPressed: _sentFav,
@@ -396,19 +382,23 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                         height: 40,
                         fit: BoxFit.fill,
                       ),
-                      onTap: () => counter().then((value) {
-                        if (value < 0) {
-                          print('object');
-                        } else {
-                          getQr(value);
-                        }
-                      }),
+                      onTap: () {
+                            counter().then((value) {
+                          print("hello" + value);
+                          if (value == "-1") {
+                            print('object');
+                          } else {
+                        print(widget.id);
+                            getQr(widget.id,value);
+                          }
+                        });
+                      }
                     ),
             ],
           ),
           centerTitle: true,
           automaticallyImplyLeading: true),
-      drawer: MyDrawer(),
+      // endDrawer: MyDrawer(),
       body: loader
           ? Center(
               child: CircularProgressIndicator(),
@@ -424,24 +414,25 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                     padding: EdgeInsets.all(width * 0.03),
                     child: ListView(
                       children: [
-                        int.parse(info.sliderType) == 0
-                            ? imageCarousel()
-                            : Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15)),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: YoutubePlayer(
-                                    controller: _youtubePlayerController,
-                                    bottomActions: [
-                                      CurrentPosition(),
-                                      ProgressBar(
-                                        isExpanded: true,
-                                      ),
-                                    ],
+                        if (isCache)
+                          int.parse(info.sliderType) == 0
+                              ? imageCarousel()
+                              : Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: YoutubePlayer(
+                                      controller: _youtubePlayerController,
+                                      bottomActions: [
+                                        CurrentPosition(),
+                                        ProgressBar(
+                                          isExpanded: true,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
                         SizedBox(
                           height: higt * 0.015,
                         ),
@@ -472,14 +463,26 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                                                     0 ||
                                                 int.parse(info.delivary) == null
                                             ? null
-                                            : () => Min(
-                                                  id: info.idd,
-                                                  title: info.menuTilte ==
-                                                              null ||
-                                                          info.menuTilte == ''
-                                                      ? "menu".tr
-                                                      : info.menuTilte,
-                                                ),
+                                            : () =>
+                                                // Min(
+                                                //       id: info.idd,
+                                                //       title: info.menuTilte ==
+                                                //                   null ||
+                                                //               info.menuTilte == ''
+                                                //           ? "menu".tr
+                                                //           : info.menuTilte,
+                                                //     ),
+                                                // Provider.of<CartListProvider>(
+                                                //         context,
+                                                //         listen: false)
+                                                //     .fetchProductCart(
+                                                //         lang, info.idd)
+                                                //     .then((value) {
+                                                //   Get.to(CartScreen());
+                                                // }),
+                                                Get.to(CartOrderScreen(
+                                                  serviceId: info.idd,
+                                                )),
                                         child: AutoSizeText(
                                           "delivery".tr,
                                           style: TextStyle(color: Colors.white),
@@ -552,7 +555,6 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                                                       )
                                       ],
                                     ),
-
                                     SizedBox(
                                       width: width * 0.35,
                                       child: RaisedButton(
@@ -600,8 +602,8 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
-                                      child: Image.network(
-                                        info.offersImage,
+                                      child: CachedNetworkImage(
+                                        imageUrl: info.offersImage,
                                         fit: BoxFit.fill,
                                       ),
                                     ),
@@ -799,7 +801,6 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                             },
                           ),
                         ),
-
                         Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: width * 0.025, vertical: higt * .01),
@@ -926,7 +927,6 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                             ),
                           ),
                         ),
-
                         Center(
                           child: Container(
                             width: width * 0.8,
@@ -944,9 +944,7 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                                         : Colors.blue,
                                     onPressed: info.viewBranches == "0"
                                         ? null
-                                        : () {
-                                            Get.to(Branches(info.idd));
-                                          },
+                                        : () {Get.to(Branches(info.idd));},
                                     child: AutoSizeText(
                                       "Branches".tr,
                                       style: TextStyle(
@@ -1255,6 +1253,25 @@ class _ServicesDetailsState extends State<ServicesDetails> {
                                               ),
                                               onTap: () async {
                                                 await launch(url());
+                                              },
+                                            ),
+                                      info.shareLink.isEmpty
+                                          ? Container()
+                                          : VerticalDivider(
+                                              color: Colors.black,
+                                              thickness: 2,
+                                            ),
+                                      info.shareLink.isEmpty
+                                          ? Container()
+                                          : InkWell(
+                                              child: Image.asset(
+                                                'assets/images/Share icon.png',
+                                                height: higt * 0.06,
+                                                fit: BoxFit.fill,
+                                              ),
+                                              onTap: () async {
+                                                await Share.share(
+                                                    info.shareLink);
                                               },
                                             ),
                                     ],
